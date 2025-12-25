@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merry Christmas | 深沉圣诞版</title>
+    <style>
+        :root {
+            /* 深沉圣诞色系：浓郁但不刺眼的红绿搭配 */
+            --dark-sage: #2c3e32;    /* 墨绿底色（代替浅绿） */
+            --deep-forest: #1a2922;  /* 深森林绿（用于文字） */
+            --rich-champagne: #dbb86f;/* 复古香槟金 */
+            --ivory: #f8f5f0;        /* 象牙白（代替纯白） */
+            --crimson-red: #9e3a3a;  /* 深红（豆沙红升级为酒红） */
+            --burgundy: #7a2828;     /* 勃艮第红（辅助红色） */
+            --rose-red: #b44242;     /* 玫瑰红（爱心专用） */
+            --apple-bezier: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body, html {
+            width: 100%; height: 100%;
+            font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif;
+            background-color: var(--dark-sage);
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            transition: background-color 2s var(--apple-bezier);
+        }
+
+        /* 氛围弥散光：适配深色背景的光影效果 */
+        .ambient-glow {
+            position: fixed; width: 100%; height: 100%;
+            background: radial-gradient(circle at 30% 30%, rgba(219, 184, 111, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 70%, rgba(26, 41, 34, 0.2) 0%, transparent 50%);
+            z-index: 1;
+            transition: background 2s var(--apple-bezier);
+        }
+
+        /* --- 第一页 --- */
+        #stage-1 {
+            position: relative; z-index: 10;
+            transition: all 1s var(--apple-bezier);
+            text-align: center;
+        }
+
+        .floating-emoji {
+            position: absolute; font-size: 35px;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+            animation: floatAnim 5s ease-in-out infinite alternate;
+            opacity: 0.9;
+            z-index: 2;
+            color: var(--ivory);
+        }
+
+        /* 卡片容器：深色背景下的质感卡片 */
+        .card-wrapper {
+            position: relative; padding: 2px;
+            background: rgba(248, 245, 240, 0.2);
+            border-radius: 46px;
+            box-shadow: 0 20px 50px rgba(16, 26, 20, 0.2);
+        }
+
+        .main-card {
+            background: rgba(248, 245, 240, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 60px 80px;
+            border-radius: 44px;
+            cursor: pointer;
+            border: 1px solid rgba(248, 245, 240, 0.8);
+            transition: all 0.5s var(--apple-bezier);
+        }
+
+        .main-card:hover { 
+            transform: scale(1.02); 
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 30px 60px rgba(16, 26, 20, 0.3);
+        }
+
+        .gift-box {
+            font-size: 80px; display: block; margin-bottom: 24px;
+            filter: grayscale(0.1) brightness(0.9); /* 适配深色背景的emoji效果 */
+            animation: giftPulse 2s infinite ease-in-out;
+        }
+
+        /* --- 第二页 --- */
+        #stage-2 {
+            position: absolute; display: none; text-align: center; z-index: 5;
+            width: 100%; opacity: 0; transform: translateY(30px);
+            transition: all 1.2s var(--apple-bezier);
+            cursor: pointer; /* 提示可点击 */
+        }
+
+        .name-title { 
+            font-size: 42px; color: var(--ivory); font-weight: 300; 
+            letter-spacing: 2px; margin-bottom: 10px; 
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .wish-text { 
+            font-size: clamp(50px, 10vw, 90px); font-weight: 700; 
+            color: var(--ivory);
+            letter-spacing: -1px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        /* --- 第三页 --- */
+        #stage-3 {
+            position: absolute; display: none; text-align: center; z-index: 5;
+            width: 100%; opacity: 0; transform: translateY(30px) scale(0.95);
+            transition: all 1.5s var(--apple-bezier);
+        }
+
+        .love-text {
+            font-size: clamp(60px, 12vw, 110px); font-weight: 700;
+            color: var(--ivory);
+            letter-spacing: 5px;
+            text-shadow: 0 6px 25px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .heart-decoration {
+            font-size: 40px;
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            opacity: 0.9;
+        }
+
+        /* 爱心动画元素 */
+        .floating-heart {
+            position: fixed;
+            font-size: 25px;
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        .revealed { opacity: 1 !important; transform: translateY(0) scale(1) !important; }
+
+        .snow {
+            position: fixed; pointer-events: none; z-index: 15;
+            border-radius: 50%;
+        }
+
+        /* 动画定义 */
+        @keyframes floatAnim {
+            from { transform: translateY(0) rotate(-5deg); }
+            to { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        @keyframes giftPulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        @keyframes heartFloat {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow" id="ambient-glow"></div>
+
+    <div id="stage-1">
+        <div class="floating-emoji" style="top: -80px; left: -50px;">🌿</div>
+        <div class="floating-emoji" style="bottom: -60px; right: -50px; animation-delay: -1s;">🦌</div>
+        <div class="floating-emoji" style="top: -40px; right: -60px; animation-delay: -2s;">🤍</div>
+        
+        <div class="card-wrapper">
+            <div class="main-card" onclick="openSurprise()">
+                <span class="gift-box">🎁</span>
+                <p style="font-size: 20px; color: var(--deep-forest); letter-spacing: -0.5px;">For 杨萌萌</p>
+                <p style="color: var(--crimson-red); font-size: 11px; margin-top: 15px; letter-spacing: 3px; font-weight: 600;">OPEN GIFT</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="stage-2" onclick="showLovePage()">
+        <div class="name-title">杨萌萌</div>
+        <div class="wish-text">圣诞快乐</div>
+        <div style="font-size: 30px; margin-top: 40px; opacity: 0.8; letter-spacing: 15px; color: var(--rich-champagne);">🎄 🦌 ❄️</div>
+        <p style="margin-top: 60px; font-size: 14px; color: var(--ivory); opacity: 0.6; letter-spacing: 2px;">点击继续 ❤️</p>
+    </div>
+
+    <div id="stage-3">
+        <div class="love-text">爱你</div>
+        <div class="heart-decoration">
+            <span style="animation: heartBeat 1.5s infinite ease-in-out;">❤️</span>
+            <span style="animation: heartBeat 1.5s infinite ease-in-out 0.3s;">💖</span>
+            <span style="animation: heartBeat 1.5s infinite ease-in-out 0.6s;">❤️</span>
+        </div>
+    </div>
+
+    <script>
+        function openSurprise() {
+            const s1 = document.getElementById('stage-1');
+            const s2 = document.getElementById('stage-2');
+            const glow = document.getElementById('ambient-glow');
+            
+            s1.style.opacity = '0';
+            s1.style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                s1.style.display = 'none';
+                s2.style.display = 'block';
+                
+                // 异步激活
+                setTimeout(() => {
+                    s2.classList.add('revealed');
+                }, 50);
+                
+                // 背景变色：从墨绿转为勃艮第红
+                document.body.style.backgroundColor = "#7a2828";
+                // 调整弥散光效果
+                glow.style.background = "radial-gradient(circle at 30% 30%, rgba(219, 184, 111, 0.15) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(122, 40, 40, 0.3) 0%, transparent 50%)";
+                
+                startSoftSnow();
+            }, 600);
+        }
+
+        function showLovePage() {
+            const s2 = document.getElementById('stage-2');
+            const s3 = document.getElementById('stage-3');
+            const glow = document.getElementById('ambient-glow');
+            
+            s2.style.opacity = '0';
+            s2.style.transform = 'translateY(-30px) scale(0.95)';
+            
+            setTimeout(() => {
+                s2.style.display = 'none';
+                s3.style.display = 'block';
+                
+                // 异步激活
+                setTimeout(() => {
+                    s3.classList.add('revealed');
+                }, 100);
+                
+                // 背景变色：从勃艮第红转为玫瑰红
+                document.body.style.backgroundColor = "#b44242";
+                // 调整弥散光效果
+                glow.style.background = "radial-gradient(circle at 30% 30%, rgba(219, 184, 111, 0.2) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(180, 66, 66, 0.4) 0%, transparent 50%)";
+                
+                // 启动爱心动画
+                startHeartAnimation();
+                // 持续生成爱心
+                setInterval(() => {
+                    createFloatingHeart();
+                }, 300);
+                
+            }, 600);
+        }
+
+        function startSoftSnow() {
+            const symbols = ['•', '❄️', '🤍'];
+            
+            setInterval(() => {
+                const p = document.createElement('div');
+                const type = Math.random();
+                p.className = 'snow';
+                
+                // 更多的小圆点，更少的emoji，视觉更干净
+                if(type > 0.92) {
+                    p.innerHTML = '❄️';
+                    p.style.fontSize = Math.random() * 10 + 10 + 'px';
+                    p.style.color = '#f8f5f0';
+                    p.style.opacity = '0.8';
+                } else if(type > 0.85) {
+                    p.innerHTML = '🤍';
+                    p.style.fontSize = '12px';
+                    p.style.opacity = '0.8';
+                } else {
+                    p.style.width = Math.random() * 4 + 2 + 'px';
+                    p.style.height = p.style.width;
+                    // 雪花颜色适配深色背景：金色与象牙白
+                    p.style.backgroundColor = Math.random() > 0.5 ? '#dbb86f' : '#f8f5f0';
+                    p.style.opacity = '0.7';
+                }
+                
+                const startX = Math.random() * 100;
+                const duration = Math.random() * 4000 + 5000;
+                
+                p.style.left = startX + 'vw';
+                p.style.top = '-20px';
+                p.style.position = 'fixed';
+                
+                document.body.appendChild(p);
+                
+                const drift = (Math.random() - 0.5) * 150;
+                
+                const anim = p.animate([
+                    { transform: `translateY(0) translateX(0) rotate(0deg)`, opacity: 0.8 },
+                    { transform: `translateY(105vh) translateX(${drift}px) rotate(360deg)`, opacity: 0 }
+                ], {
+                    duration: duration,
+                    easing: 'linear'
+                });
+
+                anim.onfinish = () => p.remove();
+            }, 150);
+        }
+
+        // 初始化爱心动画
+        function startHeartAnimation() {
+            // 初始生成一批爱心
+            for(let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    createFloatingHeart();
+                }, i * 200);
+            }
+        }
+
+        // 创建漂浮爱心
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            
+            // 随机选择爱心emoji
+            const hearts = ['❤️', '💖', '💘', '💝', '💓'];
+            heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
+            
+            // 随机位置和大小
+            const startX = Math.random() * 100;
+            const size = Math.random() * 15 + 15;
+            heart.style.fontSize = size + 'px';
+            heart.style.left = startX + 'vw';
+            heart.style.bottom = '-30px';
+            
+            // 随机颜色深浅
+            const opacity = Math.random() * 0.5 + 0.5;
+            heart.style.opacity = opacity;
+            
+            document.body.appendChild(heart);
+            
+            // 动画时长
+            const duration = Math.random() * 6000 + 4000;
+            
+            // 随机偏移
+            const drift = (Math.random() - 0.5) * 200;
+            
+            // 执行动画
+            const anim = heart.animate([
+                { transform: `translateY(0) translateX(0) rotate(0deg)`, opacity: opacity },
+                { transform: `translateY(-105vh) translateX(${drift}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+            ], {
+                duration: duration,
+                easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+            });
+
+            // 动画结束后移除元素
+            anim.onfinish = () => {
+                heart.remove();
+            };
+        }
+    </script>
+</body>
+</html>
