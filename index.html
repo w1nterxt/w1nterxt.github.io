@@ -2,534 +2,334 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-touch-fullscreen" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="format-detection" content="telephone=no, email=no">
-    <title>Merry Christmas For Ymm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>w1nterxt - 个人主页</title>
     <style>
+        /* ===== CSS Variables — 改这里就能换主题 ===== */
         :root {
-            --dark-sage: #2c3e32;    
-            --deep-forest: #1a2922;  
-            --rich-champagne: #dbb86f;
-            --ivory: #f8f5f0;        
-            --crimson-red: #9e3a3a;  
-            --burgundy: #7a2828;     
-            --rose-red: #b44242;     
-            --apple-bezier: cubic-bezier(0.23, 1, 0.32, 1);
-            --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
+            --bg: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --text: #e0e0e0;
+            --text-dim: #8892b0;
+            --accent: #6c63ff;
+            --accent-glow: rgba(108, 99, 255, 0.3);
+            --border: rgba(255, 255, 255, 0.06);
+            --radius: 12px;
+            --max-width: 900px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ===== Reset ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body, html {
-            width: 100%; height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            background-color: var(--dark-sage);
-            overflow: hidden;
-            display: flex; justify-content: center; align-items: center;
-            transition: background-color 2s var(--apple-bezier);
-            padding: var(--safe-top) 0 var(--safe-bottom) 0;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .ambient-glow {
-            position: fixed; 
-            width: 100vw; height: 100vh;
-            background: radial-gradient(circle at 30% 30%, rgba(219, 184, 111, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 70%, rgba(26, 41, 34, 0.2) 0%, transparent 50%);
-            z-index: 1;
-            transition: background 2s var(--apple-bezier);
-            top: 0; left: 0;
+        /* ===== 星空背景 ===== */
+        .stars {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
         }
 
-        /* --- 蛋糕兑换券弹窗样式 --- */
-        #coupon-modal {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+        /* ===== 主容器 ===== */
+        .container {
+            position: relative; z-index: 1;
+            max-width: var(--max-width); margin: 0 auto; padding: 0 24px;
         }
 
-        .coupon-card {
-            position: relative;
-            width: clamp(280px, 80vw, 500px);
-            background: linear-gradient(135deg, #f8f5f0 0%, #fff 100%);
-            border-radius: clamp(20px, 5vw, 30px);
-            padding: clamp(30px, 8vw, 50px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            transform: scale(0.8);
-            opacity: 0;
-            transition: all 0.8s var(--apple-bezier);
-            border: 3px solid var(--rich-champagne);
+        /* ===== 导航 ===== */
+        nav {
+            display: flex; justify-content: flex-end; gap: 28px;
+            padding: 20px 0; font-size: 0.95rem;
+            position: sticky; top: 0; z-index: 10;
+            backdrop-filter: blur(10px);
+            background: rgba(15, 15, 26, 0.6);
+            margin: 0 -24px; padding: 16px 24px;
+        }
+        nav a { color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+        nav a:hover { color: var(--accent); }
+
+        /* ===== Hero ===== */
+        .hero {
+            padding: 100px 0 60px; text-align: center;
+        }
+        .hero h1 {
+            font-size: clamp(2.2rem, 5vw, 3.5rem);
+            font-weight: 800; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent), #a78bfa, #67e8f9);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero .subtitle {
+            color: var(--text-dim); font-size: 1.15rem; margin-bottom: 8px;
+        }
+        .hero .tagline {
+            color: var(--text-dim); font-size: 0.95rem;
+            opacity: 0.7; max-width: 500px; margin: 0 auto;
         }
 
-        .coupon-card.revealed {
-            transform: scale(1);
-            opacity: 1;
+        /* ===== 区块标题 ===== */
+        .section {
+            padding: 60px 0;
+        }
+        .section-title {
+            font-size: 1.5rem; font-weight: 700; margin-bottom: 32px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .section-title::after {
+            content: ""; flex: 1; height: 1px;
+            background: var(--border); max-width: 200px;
         }
 
-        .coupon-title {
-            font-size: clamp(24px, 6vw, 36px);
-            color: var(--crimson-red);
-            font-weight: 700;
-            margin-bottom: 20px;
-            letter-spacing: 2px;
+        /* ===== 关于我 ===== */
+        .about-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 32px;
+        }
+        .about-card p { margin-bottom: 12px; }
+        .about-card p:last-child { margin-bottom: 0; }
+
+        /* ===== 技能标签 ===== */
+        .skills-grid {
+            display: flex; flex-wrap: wrap; gap: 10px;
+        }
+        .skill-tag {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 8px 18px;
+            font-size: 0.9rem; color: var(--text-dim);
+            transition: all 0.25s; cursor: default;
+        }
+        .skill-tag:hover {
+            border-color: var(--accent); color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        .coupon-subtitle {
-            font-size: clamp(16px, 4vw, 20px);
-            color: var(--deep-forest);
-            margin-bottom: 30px;
-            font-weight: 400;
+        /* ===== 项目卡片 ===== */
+        .projects-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        .project-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 28px;
+            transition: transform 0.25s, box-shadow 0.25s;
+            text-decoration: none; color: var(--text); display: block;
+        }
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px var(--accent-glow);
+            border-color: var(--accent);
+        }
+        .project-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+        .project-card p {
+            color: var(--text-dim); font-size: 0.9rem; line-height: 1.6;
+        }
+        .project-card .tag-row {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px;
+        }
+        .project-card .mini-tag {
+            font-size: 0.75rem; padding: 3px 10px;
+            border-radius: 10px; background: rgba(108, 99, 255, 0.15);
+            color: var(--accent);
         }
 
-        .cake-emoji {
-            font-size: clamp(60px, 15vw, 100px);
-            margin: 20px 0;
-            display: block;
-            animation: cakePulse 2s infinite ease-in-out;
+        /* ===== 联系 ===== */
+        .contact-links {
+            display: flex; flex-wrap: wrap; gap: 16px;
+        }
+        .contact-link {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 14px 22px;
+            text-decoration: none; color: var(--text);
+            transition: all 0.25s; font-size: 0.95rem;
+        }
+        .contact-link:hover {
+            border-color: var(--accent); color: var(--accent);
+        }
+        .contact-link svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+        /* ===== Footer ===== */
+        footer {
+            text-align: center; padding: 40px 0 30px;
+            color: var(--text-dim); font-size: 0.85rem; opacity: 0.6;
         }
 
-        .coupon-note {
-            font-size: clamp(12px, 3vw, 14px);
-            color: var(--crimson-red);
-            margin-top: 30px;
-            letter-spacing: 1px;
-            font-weight: 600;
-            padding: 10px;
-            background-color: rgba(158, 58, 58, 0.1);
-            border-radius: 8px;
-            display: inline-block;
-        }
-
-        .coupon-footer {
-            font-size: clamp(10px, 2vw, 12px);
-            color: #888;
-            margin-top: 20px;
-            opacity: 0.7;
-        }
-
-        /* --- 第一页样式 --- */
-        #stage-1 {
-            position: relative; z-index: 10;
-            transition: all 1s var(--apple-bezier);
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-        }
-
-        .floating-emoji {
-            position: absolute; font-size: clamp(20px, 8vw, 35px);
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
-            animation: floatAnim 5s ease-in-out infinite alternate;
-            opacity: 0.9;
-            z-index: 2;
-            color: var(--ivory);
-        }
-
-        .card-wrapper {
-            position: relative; padding: 2px;
-            background: rgba(248, 245, 240, 0.2);
-            border-radius: clamp(24px, 10vw, 46px);
-            box-shadow: 0 20px 50px rgba(16, 26, 20, 0.2);
-            width: 100%;
-        }
-
-        .main-card {
-            background: rgba(248, 245, 240, 0.9);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: clamp(30px, 10vw, 60px) clamp(20px, 8vw, 80px);
-            border-radius: clamp(22px, 9vw, 44px);
-            cursor: pointer;
-            touch-action: manipulation;
-            border: 1px solid rgba(248, 245, 240, 0.8);
-            transition: all 0.5s var(--apple-bezier);
-            width: 100%;
-        }
-
-        .main-card:hover { 
-            transform: scale(1.02); 
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 30px 60px rgba(16, 26, 20, 0.3);
-        }
-
-        .gift-box {
-            font-size: clamp(40px, 20vw, 80px); display: block; margin-bottom: 24px;
-            filter: grayscale(0.1) brightness(0.9);
-            animation: giftPulse 2s infinite ease-in-out;
-        }
-
-        /* --- 第二页样式 --- */
-        #stage-2 {
-            position: absolute; display: none; text-align: center; z-index: 5;
-            width: 100%; padding: 0 20px;
-            opacity: 0; transform: translateY(30px);
-            transition: all 1.2s var(--apple-bezier);
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-
-        .name-title { 
-            font-size: clamp(24px, 8vw, 42px); color: var(--ivory); font-weight: 300; 
-            letter-spacing: 2px; margin-bottom: 10px; 
-            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .wish-text { 
-            font-size: clamp(30px, 15vw, 90px); font-weight: 700; 
-            color: var(--ivory);
-            letter-spacing: -1px;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            line-height: 1.2;
-        }
-
-        /* --- 第三页样式 --- */
-        #stage-3 {
-            position: absolute; display: none; text-align: center; z-index: 5;
-            width: 100%; padding: 0 20px;
-            opacity: 0; transform: translateY(30px) scale(0.95);
-            transition: all 1.5s var(--apple-bezier);
-        }
-
-        .love-text {
-            font-size: clamp(36px, 18vw, 110px); font-weight: 700;
-            color: var(--ivory);
-            letter-spacing: 5px;
-            text-shadow: 0 6px 25px rgba(0,0,0,0.2);
-            position: relative;
-            line-height: 1.2;
-        }
-
-        .heart-decoration {
-            font-size: clamp(20px, 8vw, 40px);
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            opacity: 0.9;
-            flex-wrap: wrap;
-        }
-
-        .floating-heart {
-            position: fixed;
-            font-size: clamp(15px, 5vw, 25px);
-            pointer-events: none;
-            z-index: 20;
-            opacity: 0;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
-        }
-
-        .revealed { opacity: 1 !important; transform: translateY(0) scale(1) !important; }
-
-        .snow {
-            position: fixed; pointer-events: none; z-index: 15;
-            border-radius: 50%;
-        }
-
-        /* 动画定义 */
-        @keyframes floatAnim {
-            from { transform: translateY(0) rotate(-5deg); }
-            to { transform: translateY(-15px) rotate(5deg); }
-        }
-
-        @keyframes giftPulse {
-            0%, 100% { transform: scale(1); opacity: 0.9; }
-            50% { transform: scale(1.05); opacity: 1; }
-        }
-
-        @keyframes cakePulse {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.1) rotate(5deg); }
-        }
-
-        @keyframes heartBeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-
-        /* 横屏适配 */
-        @media screen and (orientation: landscape) and (max-height: 500px) {
-            .main-card {
-                padding: 20px 30px;
-            }
-            .gift-box {
-                font-size: 50px;
-                margin-bottom: 15px;
-            }
-            .love-text {
-                font-size: clamp(40px, 12vw, 80px);
-            }
-            .heart-decoration {
-                margin-top: 15px;
-            }
-            .coupon-card {
-                padding: 20px;
-            }
-            .cake-emoji {
-                font-size: 60px;
-            }
-        }
-
-        /* 低性能设备优化 */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.001s !important;
-                transition-duration: 0.001s !important;
-            }
-            .floating-heart, .snow {
-                display: none;
-            }
+        /* ===== 响应式 ===== */
+        @media (max-width: 600px) {
+            nav { justify-content: center; gap: 20px; }
+            .hero { padding: 60px 0 40px; }
+            .section { padding: 40px 0; }
+            .projects-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
+    <!-- 星空 -->
+    <canvas class="stars" id="stars"></canvas>
 
-    <div class="ambient-glow" id="ambient-glow"></div>
+    <div class="container">
+        <!-- 导航 -->
+        <nav>
+            <a href="#about">关于</a>
+            <a href="#skills">技能</a>
+            <a href="#projects">项目</a>
+            <a href="#contact">联系</a>
+        </nav>
 
-    <!-- 蛋糕兑换券弹窗 -->
-    <div id="coupon-modal">
-        <div class="coupon-card">
-            <h2 class="coupon-title">蛋糕兑换券</h2>
-            <p class="coupon-subtitle">圣诞限定 · 甜蜜专属</p>
-            <span class="cake-emoji">🍰</span>
-            <p class="coupon-note">杨萌萌凭截图认领</p>
-            <p class="coupon-footer">有效期：永久有效 · 最终解释权归送礼物的人所有</p>
-        </div>
-    </div>
+        <!-- Hero -->
+        <header class="hero">
+            <h1>魏欣桐</h1>
+            <p class="subtitle">软件工程 · 本科生</p>
+            <p class="tagline">写代码、搭东西、探索一切有趣的技术。</p>
+        </header>
 
-    <div id="stage-1">
-        <div class="floating-emoji" style="top: -40px; left: -20px;">🌿</div>
-        <div class="floating-emoji" style="bottom: -30px; right: -20px; animation-delay: -1s;">🦌</div>
-        <div class="floating-emoji" style="top: -20px; right: -30px; animation-delay: -2s;">🤍</div>
-        
-        <div class="card-wrapper">
-            <div class="main-card" ontouchstart="openSurprise()" onclick="openSurprise()">
-                <span class="gift-box">🎁</span>
-                <p style="font-size: clamp(16px, 4vw, 20px); color: var(--deep-forest); letter-spacing: -0.5px;">For 杨萌萌</p>
-                <p style="color: var(--crimson-red); font-size: clamp(10px, 2vw, 11px); margin-top: 15px; letter-spacing: 3px; font-weight: 600;">OPEN GIFT</p>
+        <!-- 关于 -->
+        <section class="section" id="about">
+            <h2 class="section-title">关于我</h2>
+            <div class="about-card">
+                <p>你好，我是魏欣桐（w1nterxt），软件工程专业在读。</p>
+                <p>热衷于将想法变成可运行的代码，喜欢探索各种技术栈——从前端到后端，从脚本自动化到系统工具，对一切能让计算机替人干活的事情充满兴趣。</p>
+                <p>相信「动手做」是学习最好的方式。目前在折腾的方向包括：UML 建模、自动化工具链、以及各种小玩具项目。</p>
             </div>
-        </div>
+        </section>
+
+        <!-- 技能 -->
+        <section class="section" id="skills">
+            <h2 class="section-title">技能 & 工具</h2>
+            <div class="skills-grid">
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">HTML / CSS</span>
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">Java</span>
+                <span class="skill-tag">Git / GitHub</span>
+                <span class="skill-tag">UML 建模</span>
+                <span class="skill-tag">Visio</span>
+                <span class="skill-tag">Markdown</span>
+                <span class="skill-tag">VS Code</span>
+                <span class="skill-tag">自动化脚本</span>
+            </div>
+        </section>
+
+        <!-- 项目 -->
+        <section class="section" id="projects">
+            <h2 class="section-title">项目</h2>
+            <div class="projects-grid">
+                <!-- 圣诞小玩具 -->
+                <a href="https://github.com/w1nterxt/Supreise-For-Ymm" class="project-card" target="_blank">
+                    <h3>Merry Christmas</h3>
+                    <p>一个温馨的圣诞主题互动页面，送给重要的人。</p>
+                    <div class="tag-row">
+                        <span class="mini-tag">HTML</span>
+                        <span class="mini-tag">CSS</span>
+                        <span class="mini-tag">动画</span>
+                    </div>
+                </a>
+
+                <!-- 图书馆管理系统 UML -->
+                <a href="https://github.com/w1nterxt" class="project-card" target="_blank">
+                    <h3>图书馆管理系统 UML 建模</h3>
+                    <p>软件工程实验 — 使用 Visio 进行完整的 UML 建模，涵盖用例图、类图、时序图等。</p>
+                    <div class="tag-row">
+                        <span class="mini-tag">UML</span>
+                        <span class="mini-tag">Visio</span>
+                        <span class="mini-tag">系统设计</span>
+                    </div>
+                </a>
+
+                <!-- 占位卡片 — 方便后续添加 -->
+                <div class="project-card" style="border-style: dashed; opacity: 0.5;">
+                    <h3>新项目占位</h3>
+                    <p>下一个有趣的项目会出现在这里。</p>
+                    <div class="tag-row">
+                        <span class="mini-tag">Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 联系 -->
+        <section class="section" id="contact">
+            <h2 class="section-title">联系我</h2>
+            <div class="contact-links">
+                <a href="https://github.com/w1nterxt" class="contact-link" target="_blank">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.605-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12 24 5.37 18.63 0 12 0z"/></svg>
+                    GitHub
+                </a>
+                <a href="mailto:534727951@qq.com" class="contact-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    Email
+                </a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 w1nterxt — Built with &hearts; and plain HTML</p>
+        </footer>
     </div>
 
-    <div id="stage-2" ontouchstart="showLovePage()" onclick="showLovePage()">
-        <div class="name-title">杨萌萌</div>
-        <div class="wish-text">圣诞快乐</div>
-        <div style="font-size: clamp(16px, 6vw, 30px); margin-top: 20px; opacity: 0.8; letter-spacing: 10px; color: var(--rich-champagne);">🎄 🦌 ❄️</div>
-        <p style="margin-top: 40px; font-size: clamp(12px, 3vw, 14px); color: var(--ivory); opacity: 0.6; letter-spacing: 2px;">点击继续 ❤️</p>
-    </div>
-
-    <div id="stage-3">
-        <div class="love-text">爱你</div>
-        <div class="heart-decoration">
-            <span style="animation: heartBeat 1.5s infinite ease-in-out;">❤️</span>
-            <span style="animation: heartBeat 1.5s infinite ease-in-out 0.3s;">💖</span>
-            <span style="animation: heartBeat 1.5s infinite ease-in-out 0.6s;">❤️</span>
-        </div>
-    </div>
-
+    <!-- 星空脚本 -->
     <script>
-        let isTransitioning = false;
-        // 兑换券显示时长（毫秒），可自行调整
-        const couponShowTime = 3000;
+    (function() {
+        const canvas = document.getElementById('stars');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        const count = 100;
 
-        function openSurprise() {
-            if (isTransitioning) return;
-            isTransitioning = true;
-
-            const s1 = document.getElementById('stage-1');
-            const couponModal = document.getElementById('coupon-modal');
-            const couponCard = couponModal.querySelector('.coupon-card');
-            
-            // 隐藏第一页
-            s1.style.opacity = '0';
-            s1.style.transform = 'scale(0.95)';
-            
-            setTimeout(() => {
-                s1.style.display = 'none';
-                // 显示兑换券弹窗
-                couponModal.style.display = 'flex';
-                // 触发兑换券动画
-                setTimeout(() => {
-                    couponCard.classList.add('revealed');
-                }, 100);
-
-                // 延迟指定时间后关闭兑换券，跳转到第二页
-                setTimeout(() => {
-                    closeCouponAndGoToStage2();
-                }, couponShowTime);
-
-            }, 600);
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
 
-        function closeCouponAndGoToStage2() {
-            const couponModal = document.getElementById('coupon-modal');
-            const couponCard = couponModal.querySelector('.coupon-card');
-            const s2 = document.getElementById('stage-2');
-            const glow = document.getElementById('ambient-glow');
-
-            // 隐藏兑换券
-            couponCard.classList.remove('revealed');
-            couponCard.style.transform = 'scale(0.8) translateY(20px)';
-            couponCard.style.opacity = '0';
-
-            setTimeout(() => {
-                couponModal.style.display = 'none';
-                // 显示第二页
-                s2.style.display = 'block';
-                
-                setTimeout(() => {
-                    s2.classList.add('revealed');
-                    isTransitioning = false;
-                }, 50);
-                
-                // 背景变色和雪花动画
-                document.body.style.backgroundColor = "#7a2828";
-                glow.style.background = "radial-gradient(circle at 30% 30%, rgba(219, 184, 111, 0.15) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(122, 40, 40, 0.3) 0%, transparent 50%)";
-                
-                startSoftSnow();
-            }, 500);
-        }
-
-        function showLovePage() {
-            if (isTransitioning) return;
-            isTransitioning = true;
-
-            const s2 = document.getElementById('stage-2');
-            const s3 = document.getElementById('stage-3');
-            const glow = document.getElementById('ambient-glow');
-            
-            s2.style.opacity = '0';
-            s2.style.transform = 'translateY(-30px) scale(0.95)';
-            
-            setTimeout(() => {
-                s2.style.display = 'none';
-                s3.style.display = 'block';
-                
-                setTimeout(() => {
-                    s3.classList.add('revealed');
-                    isTransitioning = false;
-                }, 100);
-                
-                document.body.style.backgroundColor = "#b44242";
-                glow.style.background = "radial-gradient(circle at 30% 30%, rgba(219, 184, 111, 0.2) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(180, 66, 66, 0.4) 0%, transparent 50%)";
-                
-                startHeartAnimation();
-                setInterval(() => {
-                    createFloatingHeart();
-                }, 300);
-                
-            }, 600);
-        }
-
-        function startSoftSnow() {
-            const symbols = ['•', '❄️', '🤍'];
-            const interval = window.innerWidth < 768 ? 250 : 150;
-            setInterval(() => {
-                const p = document.createElement('div');
-                const type = Math.random();
-                p.className = 'snow';
-                
-                if(type > 0.92) {
-                    p.innerHTML = '❄️';
-                    p.style.fontSize = Math.random() * 8 + 8 + 'px';
-                    p.style.color = '#f8f5f0';
-                    p.style.opacity = '0.8';
-                } else if(type > 0.85) {
-                    p.innerHTML = '🤍';
-                    p.style.fontSize = '10px';
-                    p.style.opacity = '0.8';
-                } else {
-                    p.style.width = Math.random() * 3 + 2 + 'px';
-                    p.style.height = p.style.width;
-                    p.style.backgroundColor = Math.random() > 0.5 ? '#dbb86f' : '#f8f5f0';
-                    p.style.opacity = '0.7';
-                }
-                
-                const startX = Math.random() * 100;
-                const duration = Math.random() * 4000 + 5000;
-                
-                p.style.left = startX + 'vw';
-                p.style.top = '-20px';
-                p.style.position = 'fixed';
-                
-                document.body.appendChild(p);
-                
-                const drift = (Math.random() - 0.5) * 100;
-                
-                const anim = p.animate([
-                    { transform: `translateY(0) translateX(0) rotate(0deg)`, opacity: 0.8 },
-                    { transform: `translateY(105vh) translateX(${drift}px) rotate(360deg)`, opacity: 0 }
-                ], {
-                    duration: duration,
-                    easing: 'linear'
+        function createStars() {
+            stars = [];
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 1.5 + 0.5,
+                    speed: Math.random() * 0.3 + 0.1,
+                    opacity: Math.random(),
+                    pulse: Math.random() * Math.PI * 2
                 });
-
-                anim.onfinish = () => p.remove();
-            }, interval);
-        }
-
-        function startHeartAnimation() {
-            const count = window.innerWidth < 768 ? 8 : 15;
-            for(let i = 0; i < count; i++) {
-                setTimeout(() => {
-                    createFloatingHeart();
-                }, i * 200);
             }
         }
 
-        function createFloatingHeart() {
-            const heart = document.createElement('div');
-            heart.className = 'floating-heart';
-            
-            const hearts = ['❤️', '💖', '💘', '💝', '💓'];
-            heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
-            
-            const startX = Math.random() * 100;
-            const size = window.innerWidth < 768 ? Math.random() * 10 + 10 : Math.random() * 15 + 15;
-            heart.style.fontSize = size + 'px';
-            heart.style.left = startX + 'vw';
-            heart.style.bottom = '-30px';
-            
-            const opacity = Math.random() * 0.5 + 0.5;
-            heart.style.opacity = opacity;
-            
-            document.body.appendChild(heart);
-            
-            const duration = window.innerWidth < 768 ? Math.random() * 4000 + 3000 : Math.random() * 6000 + 4000;
-            const drift = (Math.random() - 0.5) * 150;
-            
-            const anim = heart.animate([
-                { transform: `translateY(0) translateX(0) rotate(0deg)`, opacity: opacity },
-                { transform: `translateY(-105vh) translateX(${drift}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
-            ], {
-                duration: duration,
-                easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
-            });
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (const s of stars) {
+                s.pulse += 0.01;
+                const alpha = 0.3 + 0.4 * Math.sin(s.pulse);
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                ctx.fill();
 
-            anim.onfinish = () => {
-                heart.remove();
-            };
+                // 偶尔画十字星芒
+                if (s.r > 1.2) {
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.3})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(s.x - s.r * 3, s.y);
+                    ctx.lineTo(s.x + s.r * 3, s.y);
+                    ctx.moveTo(s.x, s.y - s.r * 3);
+                    ctx.lineTo(s.x, s.y + s.r * 3);
+                    ctx.stroke();
+                }
+            }
+            requestAnimationFrame(draw);
         }
 
-        window.addEventListener('resize', () => {
-            document.body.style.height = window.innerHeight + 'px';
-        });
-
-        document.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-        }, { passive: false });
+        resize();
+        createStars();
+        draw();
+        window.addEventListener('resize', () => { resize(); createStars(); });
+    })();
     </script>
 </body>
 </html>
-
