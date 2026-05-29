@@ -87,25 +87,39 @@
             width: 520px; height: 520px;
             top: -12%; right: -10%;
             background: radial-gradient(circle at 60% 40%, var(--accent-warm) 0%, transparent 70%);
-            opacity: 0.10;
+            opacity: 0.12;
+            animation: orb-float 12s ease-in-out infinite;
         }
         .ambient-orb--mid-left {
             width: 440px; height: 440px;
             top: 38%; left: -8%;
             background: radial-gradient(circle at 40% 50%, var(--accent) 0%, transparent 70%);
-            opacity: 0.09;
+            opacity: 0.10;
+            animation: orb-float 15s ease-in-out infinite reverse;
         }
         .ambient-orb--bottom-right {
             width: 400px; height: 400px;
             bottom: 3%; right: -6%;
             background: radial-gradient(circle at 50% 50%, var(--teal) 0%, transparent 70%);
-            opacity: 0.08;
+            opacity: 0.09;
+            animation: orb-float 18s ease-in-out infinite;
         }
         .ambient-orb--center-glow {
             width: 320px; height: 320px;
             top: 22%; left: 50%; transform: translateX(-50%);
             background: radial-gradient(circle at 50% 40%, var(--rose) 0%, transparent 70%);
-            opacity: 0.06;
+            opacity: 0.07;
+            animation: orb-pulse 8s ease-in-out infinite;
+        }
+        @keyframes orb-float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(15px, -10px) scale(1.02); }
+            50% { transform: translate(-10px, -20px) scale(1.05); }
+            75% { transform: translate(10px, -5px) scale(1.03); }
+        }
+        @keyframes orb-pulse {
+            0%, 100% { opacity: 0.07; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.10; transform: translateX(-50%) scale(1.08); }
         }
 
         /* ===== 侧边装饰线 — 纵向渐变画框结构线 ===== */
@@ -173,6 +187,7 @@
         .hero {
             padding: 140px 0 70px; text-align: center;
             position: relative;
+            overflow: hidden;
         }
         .hero::after {
             content: ""; position: absolute; bottom: 0; left: 0; right: 0;
@@ -203,6 +218,94 @@
         .hero .bio {
             color: var(--text-dim); font-size: 0.95rem;
             margin-bottom: 20px; letter-spacing: 0.02em;
+        }
+
+        /* ===== Hero背景弹幕 - 方案A ===== */
+        .hero-tags-bg {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.28;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .hero-tags-bg .tag-row {
+            position: absolute;
+            white-space: nowrap;
+            display: flex;
+            gap: 50px;
+            left: 0;
+            width: max-content;
+            animation: scroll-left 35s linear infinite;
+        }
+        .hero-tags-bg .tag-row-1 {
+            top: 80px;
+        }
+        .hero-tags-bg .tag-row-2 {
+            top: 140px;
+            animation-duration: 45s;
+            animation-direction: reverse;
+        }
+        .hero-tags-bg .tag-row-3 {
+            top: 200px;
+            animation-duration: 40s;
+        }
+        .hero-tags-bg .tag-row-4 {
+            top: 260px;
+            animation-duration: 50s;
+            animation-direction: reverse;
+        }
+        .bg-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border-radius: 20px;
+            background: rgba(147, 130, 255, 0.12);
+            border: 1px solid rgba(147, 130, 255, 0.25);
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* ===== Hero漂浮标签云 - 方案C（注释掉）===== */
+        /*
+        .hero-tags-floating {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .float-tag {
+            position: absolute;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(147, 130, 255, 0.12);
+            border: 1px solid rgba(147, 130, 255, 0.25);
+            color: var(--text);
+            white-space: nowrap;
+        }
+        */
+
+        /* 确保前景内容在背景上面 */
+        .hero .avatar,
+        .hero h1,
+        .hero .bio,
+        .hero .status-badge,
+        .hero .tagline-wrap {
+            position: relative;
+            z-index: 1;
         }
 
         /* ===== 状态徽章 ===== */
@@ -248,14 +351,40 @@
         /* ===== 区块标题 ===== */
         .section {
             padding: 80px 0;
+            position: relative;
+        }
+        .section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--border), transparent);
+            opacity: 0.3;
+        }
+        .section:first-of-type::before {
+            display: none;
         }
         .section-alt {
-            background: linear-gradient(180deg, transparent 0%, var(--bg-warm) 15%, var(--bg-warm) 85%, transparent 100%);
+            background: linear-gradient(180deg, transparent 0%, var(--bg-warm) 10%, var(--bg-warm) 90%, transparent 100%);
             margin: 0 -24px; padding-left: 24px; padding-right: 24px;
+        }
+        .section-alt::before {
+            display: none;
         }
         .section-title {
             font-size: 1.5rem; font-weight: 700; margin-bottom: 40px;
             display: flex; align-items: center; gap: 12px;
+            position: relative;
+        }
+        .section-title::before {
+            content: "";
+            width: 3px;
+            height: 1.2em;
+            background: linear-gradient(180deg, var(--accent), var(--accent-warm));
+            border-radius: 2px;
         }
         .section-title::after {
             content: ""; flex: 1; height: 1px;
@@ -269,16 +398,23 @@
             gap: 24px;
         }
         .project-card {
-            background: var(--bg-card); border: 1px solid var(--border);
+            background: rgba(30, 28, 36, 0.55);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(147, 130, 255, 0.12);
             border-left: 3px solid transparent;
             border-radius: var(--radius); padding: 28px;
-            transition: transform 0.25s, box-shadow 0.25s, border-left-color 0.3s;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-color 0.3s, 
+                        border-left-color 0.3s;
             text-decoration: none; color: var(--text); display: block;
         }
         .project-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px var(--accent-glow), 0 2px 12px var(--accent-warm-glow);
-            border-color: var(--border-emphasis);
+            transform: translateY(-6px);
+            box-shadow: 0 16px 48px rgba(147, 130, 255, 0.18), 
+                        0 4px 20px rgba(232, 168, 80, 0.12);
+            border-color: rgba(147, 130, 255, 0.3);
             border-left-color: var(--accent-warm);
         }
         .project-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
@@ -303,29 +439,52 @@
         /* ===== 技术栈标签云 ===== */
         .tech-cloud {
             display: flex; flex-wrap: wrap; gap: 10px;
+            background: linear-gradient(135deg, 
+                rgba(147, 130, 255, 0.04) 0%, 
+                rgba(232, 168, 80, 0.04) 50%, 
+                rgba(94, 196, 184, 0.04) 100%);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid rgba(147, 130, 255, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .tech-cloud::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 20%, 
+                rgba(147, 130, 255, 0.08) 0%, transparent 50%);
+            pointer-events: none;
         }
         .tech-pill {
-            background: var(--bg-card); border: 1px solid var(--border);
+            background: rgba(30, 28, 36, 0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(147, 130, 255, 0.15);
             border-radius: 20px; padding: 8px 18px;
             font-size: 0.88rem; color: var(--text-dim);
-            transition: all 0.25s; cursor: default;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: default;
             display: inline-flex; align-items: center; gap: 6px;
+            position: relative;
+            z-index: 1;
         }
         .tech-pill:hover {
-            color: var(--accent); border-color: var(--border-emphasis);
-            background: rgba(147,130,255,0.08);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px var(--accent-glow);
+            color: var(--accent); border-color: rgba(147, 130, 255, 0.35);
+            background: rgba(147, 130, 255, 0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(147, 130, 255, 0.15);
         }
         .tech-pill:nth-child(3n+1):hover {
-            color: var(--accent-warm); border-color: rgba(232,168,80,0.35);
-            background: rgba(232,168,80,0.08);
-            box-shadow: 0 4px 16px var(--accent-warm-glow);
+            color: var(--accent-warm); border-color: rgba(232, 168, 80, 0.4);
+            background: rgba(232, 168, 80, 0.12);
+            box-shadow: 0 6px 20px rgba(232, 168, 80, 0.15);
         }
         .tech-pill:nth-child(3n+2):hover {
-            color: var(--teal); border-color: rgba(94,196,184,0.35);
-            background: rgba(94,196,184,0.08);
-            box-shadow: 0 4px 16px var(--teal-glow);
+            color: var(--teal); border-color: rgba(94, 196, 184, 0.4);
+            background: rgba(94, 196, 184, 0.12);
+            box-shadow: 0 6px 20px rgba(94, 196, 184, 0.15);
         }
         @media (pointer: fine) { .tech-pill { cursor: none; } }
 
@@ -346,9 +505,14 @@
             gap: 12px;
         }
         .book-card {
-            background: var(--bg-card); border: 1px solid var(--border);
+            background: rgba(30, 28, 36, 0.55);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(147, 130, 255, 0.12);
             border-radius: var(--radius); padding: 16px;
-            transition: transform 0.25s, box-shadow 0.25s, border-color 0.3s;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-color 0.3s;
             position: relative; overflow: hidden;
         }
         .book-card::before {
@@ -358,9 +522,9 @@
             opacity: 0; transition: opacity 0.3s;
         }
         .book-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px var(--accent-glow);
-            border-color: var(--border-emphasis);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 36px rgba(147, 130, 255, 0.15);
+            border-color: rgba(147, 130, 255, 0.3);
         }
         .book-card:hover::before { opacity: 1; }
         .book-card__head {
@@ -430,16 +594,21 @@
             gap: 16px;
         }
         .media-card {
-            background: var(--bg-card); border: 1px solid var(--border);
+            background: rgba(30, 28, 36, 0.55);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(147, 130, 255, 0.12);
             border-radius: var(--radius); padding: 18px 22px;
             display: flex; align-items: center; gap: 14px;
-            transition: transform 0.25s, box-shadow 0.25s;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-color 0.3s;
             text-decoration: none; color: inherit;
         }
         a.media-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px var(--accent-warm-glow);
-            border-color: var(--border-emphasis);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 36px rgba(232, 168, 80, 0.12);
+            border-color: rgba(232, 168, 80, 0.3);
         }
         .media-card__icon {
             font-size: 1.5rem; flex-shrink: 0;
@@ -496,15 +665,20 @@
             gap: 12px;
         }
         .steam-game {
-            background: var(--bg-card); border: 1px solid var(--border);
+            background: rgba(30, 28, 36, 0.55);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(147, 130, 255, 0.12);
             border-radius: 10px; overflow: hidden;
-            transition: transform 0.25s, box-shadow 0.25s, border-color 0.3s;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-color 0.3s;
             text-decoration: none; display: block;
         }
         .steam-game:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 18px var(--accent-glow);
-            border-color: var(--border-emphasis);
+            transform: translateY(-5px);
+            box-shadow: 0 14px 40px rgba(147, 130, 255, 0.15);
+            border-color: rgba(147, 130, 255, 0.3);
         }
         .steam-game__header {
             width: 100%; aspect-ratio: 460/215;
@@ -527,12 +701,36 @@
 
         /* ===== 滚动入场动画 ===== */
         .reveal {
-            opacity: 0; transform: translateY(24px);
-            transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                        transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .reveal.visible {
             opacity: 1; transform: translateY(0);
         }
+        .reveal .project-card,
+        .reveal .book-card,
+        .reveal .media-card,
+        .reveal .media-card-editable,
+        .reveal .tech-pill {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                        transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .reveal.visible .project-card,
+        .reveal.visible .book-card,
+        .reveal.visible .media-card,
+        .reveal.visible .media-card-editable,
+        .reveal.visible .tech-pill {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal.visible .project-card:nth-child(1) { transition-delay: 0.05s; }
+        .reveal.visible .project-card:nth-child(2) { transition-delay: 0.1s; }
+        .reveal.visible .project-card:nth-child(3) { transition-delay: 0.15s; }
+        .reveal.visible .project-card:nth-child(4) { transition-delay: 0.2s; }
+        .reveal.visible .tech-pill { transition-delay: calc(var(--i, 0) * 0.02s); }
 
         /* ===== 联系 ===== */
         .contact-links {
@@ -938,15 +1136,20 @@
             gap: 20px;
         }
         .media-card-editable {
-            background: var(--bg-card); border: 1px solid var(--border);
+            background: rgba(30, 28, 36, 0.55);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(147, 130, 255, 0.12);
             border-radius: var(--radius); padding: 24px;
-            transition: transform 0.25s, box-shadow 0.25s, border-color 0.3s;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-color 0.3s;
             position: relative;
         }
         .media-card-editable:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 24px var(--accent-glow);
-            border-color: var(--border-emphasis);
+            transform: translateY(-5px);
+            box-shadow: 0 14px 40px rgba(147, 130, 255, 0.15);
+            border-color: rgba(147, 130, 255, 0.3);
         }
         .media-card-editable__head {
             display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
@@ -984,73 +1187,190 @@
         /* ===== 编辑弹窗 ===== */
         .modal-overlay {
             position: fixed; inset: 0; z-index: 100000;
-            background: rgba(5,4,10,0.75);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(5, 4, 10, 0.55);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             display: flex; align-items: center; justify-content: center;
             opacity: 0; visibility: hidden;
-            transition: opacity 0.25s, visibility 0.25s;
+            transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+        }
+        .modal-overlay::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(147, 130, 255, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(232, 168, 80, 0.06) 0%, transparent 50%);
+            pointer-events: none;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
+        body.modal-open { cursor: auto !important; }
+        body.modal-open #cursorCanvas,
+        body.modal-open #trailCanvas { display: none !important; }
+        body.modal-open a,
+        body.modal-open button,
+        body.modal-open select,
+        body.modal-open input,
+        body.modal-open textarea { cursor: pointer !important; }
         .modal {
-            background: var(--bg-card); border: 1px solid var(--border-emphasis);
-            border-radius: var(--radius); padding: 32px; width: 90%;
-            max-width: 480px; max-height: 85vh; overflow-y: auto;
-            transform: translateY(20px);
-            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            background: rgba(30, 28, 36, 0.72);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(147, 130, 255, 0.18);
+            border-radius: 20px;
+            padding: 36px;
+            width: 90%;
+            max-width: 520px;
+            max-height: 85vh;
+            overflow-y: auto;
+            transform: translateY(30px) scale(0.96);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        opacity 0.4s ease-out,
+                        box-shadow 0.4s ease-out;
+            box-shadow: 
+                0 25px 80px rgba(147, 130, 255, 0.12),
+                0 8px 30px rgba(0, 0, 0, 0.25);
+            position: relative;
         }
-        .modal-overlay.active .modal { transform: translateY(0); }
+        .modal::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(147, 130, 255, 0.5) 30%,
+                rgba(232, 168, 80, 0.5) 70%,
+                transparent 100%);
+            border-radius: 20px 20px 0 0;
+        }
+        .modal-overlay.active .modal { 
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
         .modal h3 {
-            font-size: 1.2rem; font-weight: 700; margin-bottom: 24px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 28px;
             color: var(--text);
+            position: relative;
+            padding-left: 16px;
         }
-        .modal .form-group { margin-bottom: 18px; }
+        .modal h3::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 1.2em;
+            background: linear-gradient(180deg, var(--accent), var(--accent-warm));
+            border-radius: 2px;
+        }
+        .modal .form-group { 
+            margin-bottom: 22px;
+        }
         .modal .form-group label {
-            display: block; font-size: 0.78rem; color: var(--text-muted);
-            margin-bottom: 6px; font-weight: 600; letter-spacing: 0.04em;
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
         .modal .form-group input,
         .modal .form-group textarea,
         .modal .form-group select {
-            width: 100%; padding: 10px 14px;
-            background: var(--bg); border: 1px solid var(--border);
-            border-radius: 8px; color: var(--text); font-size: 0.9rem;
-            font-family: inherit; outline: none;
-            transition: border-color 0.2s;
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(20, 18, 24, 0.6);
+            border: 1px solid rgba(147, 130, 255, 0.15);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
         }
         .modal .form-group input:focus,
         .modal .form-group textarea:focus,
         .modal .form-group select:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
+            border-color: rgba(147, 130, 255, 0.5);
+            background: rgba(20, 18, 24, 0.8);
+            box-shadow: 
+                0 0 0 3px rgba(147, 130, 255, 0.1),
+                0 0 20px rgba(147, 130, 255, 0.1);
         }
-        .modal .form-group textarea { resize: vertical; min-height: 80px; }
-        .modal .form-group select { cursor: pointer; }
+        .modal .form-group textarea { 
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.6;
+        }
+        .modal .form-group select { 
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239382ff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 18px;
+            padding-right: 40px;
+        }
         .modal .form-actions {
-            display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(147, 130, 255, 0.1);
         }
         .modal .btn {
-            padding: 10px 24px; border-radius: 8px; font-size: 0.9rem;
-            font-family: inherit; cursor: pointer; transition: all 0.2s;
-            border: 1px solid var(--border);
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            font-weight: 500;
         }
         .modal .btn-cancel {
-            background: transparent; color: var(--text-dim);
+            background: rgba(147, 130, 255, 0.08);
+            color: var(--text-dim);
+            border-color: rgba(147, 130, 255, 0.15);
         }
-        .modal .btn-cancel:hover { border-color: var(--text-muted); color: var(--text); }
+        .modal .btn-cancel:hover {
+            background: rgba(147, 130, 255, 0.12);
+            border-color: rgba(147, 130, 255, 0.3);
+            color: var(--text);
+            transform: translateY(-2px);
+        }
         .modal .btn-save {
-            background: var(--accent); color: #fff; border-color: var(--accent);
+            background: linear-gradient(135deg, var(--accent) 0%, #9b8cff 100%);
+            color: #fff;
+            border-color: transparent;
             font-weight: 600;
+            box-shadow: 0 4px 20px rgba(147, 130, 255, 0.3);
         }
         .modal .btn-save:hover {
-            background: #a899ff; box-shadow: 0 4px 16px var(--accent-glow);
+            background: linear-gradient(135deg, #a899ff 0%, #b8a8ff 100%);
+            box-shadow: 0 6px 30px rgba(147, 130, 255, 0.4);
+            transform: translateY(-2px);
         }
         .modal .btn-delete-item {
-            background: transparent; color: var(--rose); border-color: transparent;
+            background: transparent;
+            color: var(--rose);
+            border-color: transparent;
             margin-right: auto;
+            padding: 12px 16px;
         }
         .modal .btn-delete-item:hover {
-            background: rgba(232,125,138,0.1); border-color: var(--rose);
+            background: rgba(232, 125, 138, 0.1);
+            border-color: rgba(232, 125, 138, 0.3);
+            transform: translateY(-2px);
         }
 
         /* 弹窗内星级评分交互 */
@@ -1487,52 +1807,125 @@
     <div class="container">
         <!-- 导航 -->
         <nav>
+            <a href="#tags">标签</a>
             <a href="#books">书架</a>
-            <a href="#movies">片单</a>
             <a href="#anime">番单</a>
-            <a href="#universes">宇宙</a>
             <a href="#games">游戏</a>
             <a href="#contact">联系</a>
         </nav>
 
         <!-- Hero -->
         <header class="hero reveal">
+            <!-- 背景弹幕 - 方案A -->
+            <div class="hero-tags-bg">
+                <div class="tag-row tag-row-1">
+                    <span class="bg-tag">🎤 周杰伦</span>
+                    <span class="bg-tag">🎤 林俊杰</span>
+                    <span class="bg-tag">🎤 方大同</span>
+                    <span class="bg-tag">🎵 R&B</span>
+                    <span class="bg-tag">🎨 抽象</span>
+                    <span class="bg-tag">🎌 二次元</span>
+                    <span class="bg-tag">🤔 哲学</span>
+                    <span class="bg-tag">🌀 中二</span>
+                    <span class="bg-tag">🎤 周杰伦</span>
+                    <span class="bg-tag">🎤 林俊杰</span>
+                    <span class="bg-tag">🎤 方大同</span>
+                    <span class="bg-tag">🎵 R&B</span>
+                    <span class="bg-tag">🎨 抽象</span>
+                    <span class="bg-tag">🎌 二次元</span>
+                    <span class="bg-tag">🤔 哲学</span>
+                    <span class="bg-tag">🌀 中二</span>
+                </div>
+                <div class="tag-row tag-row-2">
+                    <span class="bg-tag">🏠 后室</span>
+                    <span class="bg-tag">🎭 VUP</span>
+                    <span class="bg-tag">⚔️ 玄幻</span>
+                    <span class="bg-tag">📚 轻小说</span>
+                    <span class="bg-tag">🎮 明日方舟</span>
+                    <span class="bg-tag">⛏️ 泰拉瑞亚</span>
+                    <span class="bg-tag">🐙 克苏鲁神话</span>
+                    <span class="bg-tag">🔒 SCP基金会</span>
+                    <span class="bg-tag">🏠 后室</span>
+                    <span class="bg-tag">🎭 VUP</span>
+                    <span class="bg-tag">⚔️ 玄幻</span>
+                    <span class="bg-tag">📚 轻小说</span>
+                    <span class="bg-tag">🎮 明日方舟</span>
+                    <span class="bg-tag">⛏️ 泰拉瑞亚</span>
+                    <span class="bg-tag">🐙 克苏鲁神话</span>
+                    <span class="bg-tag">🔒 SCP基金会</span>
+                </div>
+                <div class="tag-row tag-row-3">
+                    <span class="bg-tag">🎮 独立游戏</span>
+                    <span class="bg-tag">🎲 策略游戏</span>
+                    <span class="bg-tag">🤖 AI</span>
+                    <span class="bg-tag">🐍 Python</span>
+                    <span class="bg-tag">⚡ 自动化</span>
+                    <span class="bg-tag">🦉 夜猫子</span>
+                    <span class="bg-tag">🖥️ 宅</span>
+                    <span class="bg-tag">🌌 科幻</span>
+                    <span class="bg-tag">🎮 独立游戏</span>
+                    <span class="bg-tag">🎲 策略游戏</span>
+                    <span class="bg-tag">🤖 AI</span>
+                    <span class="bg-tag">🐍 Python</span>
+                    <span class="bg-tag">⚡ 自动化</span>
+                    <span class="bg-tag">🦉 夜猫子</span>
+                    <span class="bg-tag">🖥️ 宅</span>
+                    <span class="bg-tag">🌌 科幻</span>
+                </div>
+                <div class="tag-row tag-row-4">
+                    <span class="bg-tag">🔮 超能力</span>
+                    <span class="bg-tag">🧩 轮回</span>
+                    <span class="bg-tag">🌙 无限流</span>
+                    <span class="bg-tag">📖 视觉小说</span>
+                    <span class="bg-tag">📜 神话</span>
+                    <span class="bg-tag">🌿 极简主义</span>
+                    <span class="bg-tag">🎯 实用主义</span>
+                    <span class="bg-tag">🚀 先跑起来</span>
+                    <span class="bg-tag">🔮 超能力</span>
+                    <span class="bg-tag">🧩 轮回</span>
+                    <span class="bg-tag">🌙 无限流</span>
+                    <span class="bg-tag">📖 视觉小说</span>
+                    <span class="bg-tag">📜 神话</span>
+                    <span class="bg-tag">🌿 极简主义</span>
+                    <span class="bg-tag">🎯 实用主义</span>
+                    <span class="bg-tag">🚀 先跑起来</span>
+                </div>
+            </div>
+
+            <!-- 漂浮标签云 - 方案C（注释掉） -->
+            <!--
+            <div class="hero-tags-floating" id="heroTagsFloating"></div>
+            -->
+
+            <!-- 前景内容 -->
             <img class="avatar" src="avatar.svg" alt="w1nterxt">
             <h1>w1nterxt</h1>
-            <p class="bio">CS 大三 · Python / Linux / AI · 在西安</p>
 
             <!-- 状态徽章 -->
             <div class="status-badge">
                 <span class="status-dot"></span>
-                Open to collaborate
+                寻找有趣的东西
             </div>
 
-            <!-- 轮播标语 -->
-            <div class="tagline-wrap" id="taglineWrap">
-                <span class="tagline-item active">CS 在读。写代码、搭东西，能用脚本解决的绝不动手。</span>
-                <span class="tagline-item">Python 为主，折腾 AI 应用和自动化工具。</span>
-                <span class="tagline-item">Linux 日常用户，终端比 GUI 顺手。</span>
-                <span class="tagline-item">实用主义 — 东西先跑起来，再谈优化。</span>
-            </div>
+            <!-- 轮播标语（随机诗句） -->
+            <div class="tagline-wrap" id="taglineWrap"></div>
         </header>
 
-        <!-- 技术栈 -->
-        <section class="section reveal" id="projects">
-            <h2 class="section-title">技术栈</h2>
+        <!-- 技能树 -->
+        <section class="section reveal" id="skills">
+            <h2 class="section-title">技能树</h2>
             <div class="tech-cloud">
                 <span class="tech-pill">🐍 Python</span>
-                <span class="tech-pill">🐧 Linux</span>
                 <span class="tech-pill">🤖 AI / LLM</span>
                 <span class="tech-pill">🖥️ Git</span>
                 <span class="tech-pill">📦 VS Code</span>
                 <span class="tech-pill">🌐 HTML / CSS</span>
                 <span class="tech-pill">⚡ 自动化脚本</span>
-                <span class="tech-pill">🔧 终端工具</span>
             </div>
         </section>
 
         <!-- 做过的东西 -->
-        <section class="section section-alt reveal">
+        <section class="section reveal">
             <h2 class="section-title">做过的东西</h2>
             <div class="projects-grid">
                 <a href="https://github.com/w1nterxt/Supreise-For-Ymm" class="project-card" target="_blank" rel="noopener noreferrer">
@@ -1559,18 +1952,6 @@
             </button>
         </section>
 
-        <!-- 片单 -->
-        <section class="section section-alt reveal" id="movies">
-            <h2 class="section-title">片单</h2>
-            <div class="collapsible-body" id="moviesBody">
-                <div class="media-grid-wide" id="moviesGrid"></div>
-            </div>
-            <button class="add-card-btn" data-collection="movies">+ 添加影片</button>
-            <button class="collapse-toggle" data-section="movies">
-                展开全部 <span class="collapse-toggle__icon">▾</span>
-            </button>
-        </section>
-
         <!-- 番单 -->
         <section class="section reveal" id="anime">
             <h2 class="section-title">番单</h2>
@@ -1581,27 +1962,6 @@
             <button class="collapse-toggle" data-section="anime">
                 展开全部 <span class="collapse-toggle__icon">▾</span>
             </button>
-        </section>
-
-        <!-- 文化宇宙 -->
-        <section class="section section-alt reveal" id="universes">
-            <h2 class="section-title">文化宇宙</h2>
-            <div class="universe-grid">
-                <div class="universe-card">
-                    <div class="universe-card__title">
-                        <span class="universe-card__icon">🐙</span>
-                        克苏鲁神话
-                    </div>
-                    <p class="universe-card__desc">洛夫克拉夫特开创的宇宙恐怖体系。核心设定：人类在浩瀚宇宙中渺小且无知，真正的恐惧来自无法理解的未知存在。旧日支配者、外神、梦境诸神共同构成了一个令人着迷的黑暗神话。</p>
-                </div>
-                <div class="universe-card">
-                    <div class="universe-card__title">
-                        <span class="universe-card__icon">🔒</span>
-                        SCP 基金会
-                    </div>
-                    <p class="universe-card__desc">全球协同创作的异常收容世界观。「控制、收容、保护」——数千篇文档构建出一个庞大而严谨的超自然宇宙。从无害小物件到灭世级实体，每一篇 SCP 文档都是一次想象力实验。</p>
-                </div>
-            </div>
         </section>
 
         <!-- 游戏 -->
@@ -1858,19 +2218,73 @@
     })();
     </script>
 
-    <!-- 轮播标语脚本 -->
+    <!-- 轮播标语脚本（随机诗句） -->
     <script>
     (function() {
-        const items = document.querySelectorAll('.tagline-item');
-        let current = 0;
-        const total = items.length;
+        var POEMS = [
+            '人生如逆旅，我亦是行人。——苏轼',
+            '莫愁前路无知己，天下谁人不识君。——高适',
+            '山重水复疑无路，柳暗花明又一村。——陆游',
+            '会当凌绝顶，一览众山小。——杜甫',
+            '但愿人长久，千里共婵娟。——苏轼',
+            '路漫漫其修远兮，吾将上下而求索。——屈原',
+            '天生我材必有用，千金散尽还复来。——李白',
+            '人生得意须尽欢，莫使金樽空对月。——李白',
+            '采菊东篱下，悠然见南山。——陶渊明',
+            '行到水穷处，坐看云起时。——王维',
+            '竹杖芒鞋轻胜马，谁怕？一蓑烟雨任平生。——苏轼',
+            '小舟从此逝，江海寄余生。——苏轼',
+            '醉里挑灯看剑，梦回吹角连营。——辛弃疾',
+            '落霞与孤鹜齐飞，秋水共长天一色。——王勃',
+            '曾经沧海难为水，除却巫山不是云。——元稹',
+            '衣带渐宽终不悔，为伊消得人憔悴。——柳永',
+            '世事洞明皆学问，人情练达即文章。——曹雪芹',
+            '问君能有几多愁，恰似一江春水向东流。——李煜',
+            '沉舟侧畔千帆过，病树前头万木春。——刘禹锡',
+            '抽刀断水水更流，举杯消愁愁更愁。——李白',
+            '桃花潭水深千尺，不及汪伦送我情。——李白',
+            '海内存知己，天涯若比邻。——王勃',
+            '春风又绿江南岸，明月何时照我还。——王安石',
+            '春风得意马蹄疾，一日看尽长安花。——孟郊',
+            '大漠孤烟直，长河落日圆。——王维',
+            '明月几时有，把酒问青天。——苏轼',
+            '众里寻他千百度，蓦然回首，那人却在，灯火阑珊处。——辛弃疾',
+            '身无彩凤双飞翼，心有灵犀一点通。——李商隐',
+            '人生自古谁无死，留取丹心照汗青。——文天祥',
+            '等闲识得东风面，万紫千红总是春。——朱熹'
+        ];
+
+        function shuffle(arr) {
+            var array = arr.slice();
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+            return array;
+        }
+
+        var wrap = document.getElementById('taglineWrap');
+        if (!wrap) return;
+
+        var selected = shuffle(POEMS).slice(0, 5);
+
+        wrap.innerHTML = selected.map(function(text, index) {
+            var activeClass = index === 0 ? ' active' : '';
+            return '<span class="tagline-item' + activeClass + '">' + text + '</span>';
+        }).join('');
+
+        var items = document.querySelectorAll('.tagline-item');
+        var current = 0;
+        var total = items.length;
         if (total <= 1) return;
 
-        setInterval(() => {
+        setInterval(function() {
             items[current].classList.remove('active');
             current = (current + 1) % total;
             items[current].classList.add('active');
-        }, 3500);
+        }, 4000);
     })();
     </script>
 
@@ -2012,10 +2426,14 @@
         });
 
         // 所有可交互元素的悬停检测
-        document.querySelectorAll('a, button, .project-card, .book-card, .universe-card, .media-card, .tech-pill').forEach(el => {
-            el.addEventListener('mouseenter', () => { targetProgress = 1; });
-            el.addEventListener('mouseleave', () => { targetProgress = 0; });
-        });
+        function setupHoverDetection() {
+            document.querySelectorAll('a, button, .project-card, .book-card, .universe-card, .media-card, .tech-pill, .media-card-editable, .add-card-btn, .collapse-toggle, .card-actions button, .contact-link, nav a, .star-input .star, .tag-remove, select, input, textarea').forEach(el => {
+                el.addEventListener('mouseenter', () => { targetProgress = 1; });
+                el.addEventListener('mouseleave', () => { targetProgress = 0; });
+            });
+        }
+        setupHoverDetection();
+        window.setupCursorHover = setupHoverDetection;
 
         function lerp(a, b, t) { return a + (b - a) * t; }
 
@@ -2683,11 +3101,14 @@
             }
 
             overlay.classList.add('active');
+            document.body.classList.add('modal-open');
+            if (window.setupCursorHover) window.setupCursorHover();
         }
 
         function closeModal() {
             var overlay = document.getElementById('editModal');
             if (overlay) overlay.classList.remove('active');
+            document.body.classList.remove('modal-open');
             modalState.collection = null;
             modalState.editId = null;
         }
@@ -2863,5 +3284,155 @@
         bindModalEvents();
     })();
     </script>
+
+    <!-- Hero漂浮标签云 - 方案C（注释掉）
+    <script>
+    (function() {
+        var FLOAT_TAGS = [
+            { text: '🐙 克苏鲁神话', size: 'large' },
+            { text: '🎮 独立游戏', size: 'medium' },
+            { text: '🤖 AI', size: 'large' },
+            { text: '🛠️ 折腾', size: 'small' },
+            { text: '🎵 纯音乐', size: 'medium' },
+            { text: '🔍 推理', size: 'small' },
+            { text: '🔄 时间循环', size: 'medium' },
+            { text: '⚡ 自动化', size: 'medium' },
+            { text: '🔮 超能力', size: 'small' },
+            { text: '🦉 夜猫子', size: 'medium' },
+            { text: '🔧 工具控', size: 'small' },
+            { text: '🌊 Lo-Fi', size: 'small' },
+            { text: '🧩 轮回', size: 'medium' },
+            { text: '🎬 悬疑片', size: 'medium' },
+            { text: '🐍 Python', size: 'large' },
+            { text: '🌌 科幻', size: 'medium' },
+            { text: '🔒 SCP基金会', size: 'medium' },
+            { text: '🎥 科幻电影', size: 'medium' },
+            { text: '🎸 摇滚', size: 'small' },
+            { text: '☕ 咖啡爱好者', size: 'small' },
+            { text: '🎧 耳机党', size: 'small' },
+            { text: '🖥️ 宅', size: 'small' },
+            { text: '📖 视觉小说', size: 'medium' },
+            { text: '🎭 都市异能', size: 'small' },
+            { text: '🌙 无限流', size: 'medium' },
+            { text: '💀 恐怖', size: 'small' },
+            { text: '🧠 智斗', size: 'small' },
+            { text: '📜 神话', size: 'small' },
+            { text: '🌿 极简主义', size: 'small' },
+            { text: '📱 数码控', size: 'small' },
+            { text: '🎯 实用主义', size: 'small' },
+            { text: '🚀 先跑起来', size: 'small' }
+        ];
+
+        var activeTags = [];
+        var animationId = null;
+
+        function createFloatingTags() {
+            var container = document.getElementById('heroTagsFloating');
+            if (!container) return;
+
+            container.innerHTML = '';
+            activeTags = [];
+
+            var containerRect = container.getBoundingClientRect();
+            var centerX = containerRect.width / 2;
+            var centerY = containerRect.height / 2;
+
+            FLOAT_TAGS.forEach(function(tag, index) {
+                var el = document.createElement('span');
+                el.className = 'float-tag';
+                el.textContent = tag.text;
+
+                var angle = (index / FLOAT_TAGS.length) * Math.PI * 2 + Math.random() * 0.5;
+                var radius = 60 + Math.random() * 140;
+                var startX = centerX + Math.cos(angle) * radius;
+                var startY = centerY + Math.sin(angle) * radius;
+
+                var tx = (Math.random() - 0.5) * 100;
+                var ty = (Math.random() - 0.5) * 100;
+
+                if (tag.size === 'large') {
+                    el.style.fontSize = '1rem';
+                    el.style.padding = '8px 18px';
+                } else if (tag.size === 'medium') {
+                    el.style.fontSize = '0.85rem';
+                    el.style.padding = '6px 14px';
+                } else {
+                    el.style.fontSize = '0.75rem';
+                    el.style.padding = '4px 10px';
+                }
+
+                var opacity = 0.15 + Math.random() * 0.2;
+                el.style.opacity = opacity;
+
+                el.style.left = startX + 'px';
+                el.style.top = startY + 'px';
+                el.style.transform = 'translate(-50%, -50%)';
+
+                container.appendChild(el);
+
+                activeTags.push({
+                    el: el,
+                    x: startX,
+                    y: startY,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    baseOpacity: opacity,
+                    opacityPhase: Math.random() * Math.PI * 2
+                });
+            });
+
+            startAnimation();
+        }
+
+        function startAnimation() {
+            var lastTime = 0;
+
+            function animate(currentTime) {
+                if (!lastTime) lastTime = currentTime;
+                var delta = currentTime - lastTime;
+                lastTime = currentTime;
+
+                var container = document.getElementById('heroTagsFloating');
+                if (!container) {
+                    animationId = requestAnimationFrame(animate);
+                    return;
+                }
+
+                var containerRect = container.getBoundingClientRect();
+                var width = containerRect.width;
+                var height = containerRect.height;
+
+                activeTags.forEach(function(tag) {
+                    tag.x += tag.vx * delta * 0.05;
+                    tag.y += tag.vy * delta * 0.05;
+
+                    if (tag.x < 50) { tag.x = 50; tag.vx *= -1; }
+                    if (tag.x > width - 50) { tag.x = width - 50; tag.vx *= -1; }
+                    if (tag.y < 30) { tag.y = 30; tag.vy *= -1; }
+                    if (tag.y > height - 30) { tag.y = height - 30; tag.vy *= -1; }
+
+                    tag.opacityPhase += delta * 0.001;
+                    var opacityOffset = Math.sin(tag.opacityPhase) * 0.05;
+                    var newOpacity = tag.baseOpacity + opacityOffset;
+
+                    tag.el.style.left = tag.x + 'px';
+                    tag.el.style.top = tag.y + 'px';
+                    tag.el.style.opacity = newOpacity;
+                });
+
+                animationId = requestAnimationFrame(animate);
+            }
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('load', createFloatingTags);
+        window.addEventListener('resize', function() {
+            if (animationId) cancelAnimationFrame(animationId);
+            createFloatingTags();
+        });
+    })();
+    </script>
+    -->
 </body>
 </html>
