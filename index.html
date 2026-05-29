@@ -374,8 +374,9 @@
         let mx = -200, my = -200;
         let smx = -200, smy = -200;
         let time = 0;
-        let hovering = false;
-        const size = 100; // 画布大小
+        let targetProgress = 0;    // 目标: 0=普通, 1=悬停
+        let progress = 0;          // 当前插值
+        const size = 120;
 
         c.width = size; c.height = size;
 
@@ -388,14 +389,17 @@
 
         // 悬停检测
         document.querySelectorAll('a, button, .project-card').forEach(el => {
-            el.addEventListener('mouseenter', () => { hovering = true; });
-            el.addEventListener('mouseleave', () => { hovering = false; });
+            el.addEventListener('mouseenter', () => { targetProgress = 1; });
+            el.addEventListener('mouseleave', () => { targetProgress = 0; });
         });
+
+        function lerp(a, b, t) { return a + (b - a) * t; }
 
         function draw(t) {
             time = t * 0.001;
             smx += (mx - smx) * 0.15;
             smy += (my - smy) * 0.15;
+            progress += (targetProgress - progress) * 0.07;  // 平滑过渡
 
             const cx = smx, cy = smy;
             c.style.left = (cx - size/2) + 'px';
@@ -405,65 +409,92 @@
             if (mx < -100) { requestAnimationFrame(draw); return; }
 
             const mid = size / 2;
-            const scale = hovering ? 1.6 : 1;
-            const ringR = 22 * scale;
-            const ringR2 = 14 * scale;
+            const p = progress;
+
+            // === 基础尺寸（普通小 → 悬停大）===
+            const scale = lerp(0.75, 1.8, p);
+            const ringR  = lerp(12, 26, p);
+            const ringR2 = lerp(7, 16, p);
 
             // === 光晕 ===
-            const glow = ctx.createRadialGradient(mid, mid, 0, mid, mid, ringR + 10);
-            glow.addColorStop(0, 'rgba(130,100,255,0.25)');
-            glow.addColorStop(0.4, 'rgba(100,70,240,0.08)');
+            const glowR = lerp(14, ringR + 14, p);
+            const glowAlpha = lerp(0.12, 0.3, p);
+            const glow = ctx.createRadialGradient(mid, mid, 0, mid, mid, glowR);
+            glow.addColorStop(0, `rgba(130,100,255,${glowAlpha})`);
+            glow.addColorStop(0.5, `rgba(100,70,240,${glowAlpha * 0.25})`);
             glow.addColorStop(1, 'transparent');
             ctx.fillStyle = glow;
-            ctx.beginPath(); ctx.arc(mid, mid, ringR + 10, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(mid, mid, glowR, 0, Math.PI * 2); ctx.fill();
 
-            // === 星环1 (主环，倾斜45度) ===
+            // === 星环1 (外环) ===
+            const ring1Alpha = lerp(0.2, 0.7, p);
             ctx.save();
             ctx.translate(mid, mid);
             ctx.rotate(-0.6);
             ctx.scale(1, 0.35);
-            ctx.strokeStyle = 'rgba(160,130,255,0.6)';
+            ctx.strokeStyle = `rgba(160,130,255,${ring1Alpha})`;
             ctx.lineWidth = 1.2;
             ctx.beginPath(); ctx.arc(0, 0, ringR, 0, Math.PI * 2); ctx.stroke();
 
-            // 环上小光点
-            for (let i = 0; i < 6; i++) {
-                const angle = time * 0.8 + (i / 6) * Math.PI * 2;
+            // 环上光点（数量随 p 增多：2 → 6）
+            const dotCount1 = Math.round(lerp(2, 6, p));
+            const dotAlpha1 = lerp(0.35, 0.95, p);
+            for (let i = 0; i < dotCount1; i++) {
+                const angle = time * (0.4 + p * 0.6) + (i / dotCount1) * Math.PI * 2;
                 const rx = Math.cos(angle) * ringR;
                 const ry = Math.sin(angle) * ringR;
-                ctx.beginPath(); ctx.arc(rx, ry, 2, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(200,170,255,0.9)'; ctx.fill();
+                ctx.beginPath(); ctx.arc(rx, ry, lerp(1, 2.2, p), 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(200,170,255,${dotAlpha1})`; ctx.fill();
             }
             ctx.restore();
 
-            // === 星环2 (内环，反方向倾斜) ===
+            // === 星环2 (内环，悬停时才明显) ===
+            const ring2Alpha = lerp(0.05, 0.5, p);
             ctx.save();
             ctx.translate(mid, mid);
             ctx.rotate(1.2);
             ctx.scale(1, 0.25);
-            ctx.strokeStyle = 'rgba(140,120,230,0.4)';
+            ctx.strokeStyle = `rgba(140,120,230,${ring2Alpha})`;
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.arc(0, 0, ringR2, 0, Math.PI * 2); ctx.stroke();
 
-            for (let i = 0; i < 4; i++) {
-                const angle = -time * 1.1 + (i / 4) * Math.PI * 2 + 0.5;
+            const dotCount2 = Math.round(lerp(1, 4, p));
+            const dotAlpha2 = lerp(0.15, 0.8, p);
+            for (let i = 0; i < dotCount2; i++) {
+                const angle = -time * (0.6 + p * 0.7) + (i / dotCount2) * Math.PI * 2 + 0.5;
                 const rx = Math.cos(angle) * ringR2;
                 const ry = Math.sin(angle) * ringR2;
-                ctx.beginPath(); ctx.arc(rx, ry, 1.5, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(180,150,240,0.7)'; ctx.fill();
+                ctx.beginPath(); ctx.arc(rx, ry, lerp(0.8, 1.8, p), 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(180,150,240,${dotAlpha2})`; ctx.fill();
             }
             ctx.restore();
 
+            // === 悬停专属：外围粒子环 ===
+            if (p > 0.05) {
+                const sparkCount = Math.floor(lerp(0, 8, p));
+                const sparkAlpha = lerp(0, 0.6, p);
+                const sparkR = ringR + 12;
+                for (let i = 0; i < sparkCount; i++) {
+                    const angle = time * 1.5 + i * (Math.PI * 2 / sparkCount);
+                    const sx = mid + Math.cos(angle) * sparkR * (0.9 + 0.1 * Math.sin(time * 3 + i));
+                    const sy = mid + Math.sin(angle) * sparkR * (0.9 + 0.1 * Math.cos(time * 2.5 + i));
+                    ctx.beginPath(); ctx.arc(sx, sy, 1.2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255,255,255,${sparkAlpha * (0.5 + 0.5 * Math.sin(time * 4 + i))})`; ctx.fill();
+                }
+            }
+
             // === 中心星 ===
-            const starGlow = ctx.createRadialGradient(mid, mid, 0, mid, mid, 6 * scale);
+            const starInner = lerp(4, 8, p);
+            const starOuter = lerp(8, 14, p);
+            const starGlow = ctx.createRadialGradient(mid, mid, 0, mid, mid, starOuter);
             starGlow.addColorStop(0, '#fff');
-            starGlow.addColorStop(0.3, 'rgba(200,170,255,1)');
+            starGlow.addColorStop(0.25, `rgba(200,170,255,${lerp(0.6, 1, p)})`);
             starGlow.addColorStop(1, 'transparent');
             ctx.fillStyle = starGlow;
-            ctx.beginPath(); ctx.arc(mid, mid, 6 * scale, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(mid, mid, starOuter, 0, Math.PI * 2); ctx.fill();
 
             // 中心实心点
-            ctx.beginPath(); ctx.arc(mid, mid, 2.5 * scale, 0, Math.PI * 2);
+            ctx.beginPath(); ctx.arc(mid, mid, lerp(2, 3, p), 0, Math.PI * 2);
             ctx.fillStyle = '#fff'; ctx.fill();
 
             requestAnimationFrame(draw);
