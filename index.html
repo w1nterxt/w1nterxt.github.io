@@ -23,11 +23,45 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-            background: var(--bg);
+            background: radial-gradient(ellipse at 50% 0%, #1a1a3e 0%, var(--bg) 60%);
             color: var(--text);
             line-height: 1.7;
             min-height: 100vh;
             overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* 自定义指针 */
+        .cursor-dot {
+            position: fixed; z-index: 9999;
+            width: 8px; height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 12px var(--accent-glow);
+            transition: width 0.15s, height 0.15s;
+        }
+        .cursor-ring {
+            position: fixed; z-index: 9998;
+            width: 32px; height: 32px;
+            border: 1.5px solid rgba(108, 99, 255, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: all 0.08s ease-out;
+        }
+
+        /* 悬停可交互元素时放大 */
+        a:hover ~ .cursor-ring,
+        button:hover ~ .cursor-ring {
+            width: 48px; height: 48px;
+            border-color: var(--accent);
+        }
+        a:hover ~ .cursor-dot,
+        button:hover ~ .cursor-dot {
+            width: 14px; height: 14px;
+            background: #fff;
         }
 
         /* ===== 星空背景 ===== */
@@ -176,6 +210,10 @@
     </style>
 </head>
 <body>
+    <!-- 自定义指针 -->
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
     <!-- 星空 -->
     <canvas class="stars" id="stars"></canvas>
 
@@ -240,13 +278,14 @@
         </footer>
     </div>
 
-    <!-- 星空脚本 -->
+    <!-- 星空 + 指针脚本 -->
     <script>
     (function() {
         const canvas = document.getElementById('stars');
         const ctx = canvas.getContext('2d');
         let stars = [];
-        const count = 100;
+        let mouse = { x: -999, y: -999 };
+        const count = 180;
 
         function resize() {
             canvas.width = window.innerWidth;
@@ -256,39 +295,91 @@
         function createStars() {
             stars = [];
             for (let i = 0; i < count; i++) {
+                const r = Math.random() < 0.08
+                    ? Math.random() * 1.2 + 1.8   // 少量亮星
+                    : Math.random() * 1.1 + 0.4;  // 多数暗星
                 stars.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
-                    r: Math.random() * 1.5 + 0.5,
-                    speed: Math.random() * 0.3 + 0.1,
-                    opacity: Math.random(),
-                    pulse: Math.random() * Math.PI * 2
+                    r,
+                    baseAlpha: r > 1.5 ? 0.5 : 0.2,
+                    speedX: (Math.random() - 0.5) * 0.15,
+                    speedY: (Math.random() - 0.5) * 0.15,
+                    pulse: Math.random() * Math.PI * 2,
+                    pulseSpeed: 0.005 + Math.random() * 0.02,
+                    hue: Math.random() < 0.2 ? 260 : 210 + Math.random() * 50
                 });
             }
         }
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (const s of stars) {
-                s.pulse += 0.01;
-                const alpha = 0.3 + 0.4 * Math.sin(s.pulse);
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                ctx.fill();
 
-                // 偶尔画十字星芒
-                if (s.r > 1.2) {
-                    ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.3})`;
-                    ctx.lineWidth = 0.5;
-                    ctx.beginPath();
-                    ctx.moveTo(s.x - s.r * 3, s.y);
-                    ctx.lineTo(s.x + s.r * 3, s.y);
-                    ctx.moveTo(s.x, s.y - s.r * 3);
-                    ctx.lineTo(s.x, s.y + s.r * 3);
-                    ctx.stroke();
+            // 连线（近的亮星之间）
+            for (let i = 0; i < stars.length; i++) {
+                if (stars[i].r < 1.5) continue;
+                for (let j = i + 1; j < stars.length; j++) {
+                    if (stars[j].r < 1.5) continue;
+                    const dx = stars[i].x - stars[j].x;
+                    const dy = stars[i].y - stars[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 120) {
+                        const alpha = (1 - dist / 120) * 0.12;
+                        ctx.beginPath();
+                        ctx.moveTo(stars[i].x, stars[i].y);
+                        ctx.lineTo(stars[j].x, stars[j].y);
+                        ctx.strokeStyle = `rgba(140, 130, 255, ${alpha})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
                 }
             }
+
+            for (const s of stars) {
+                s.pulse += s.pulseSpeed;
+                s.x += s.speedX;
+                s.y += s.speedY;
+
+                // 边界回弹
+                if (s.x < -10) s.x = canvas.width + 10;
+                if (s.x > canvas.width + 10) s.x = -10;
+                if (s.y < -10) s.y = canvas.height + 10;
+                if (s.y > canvas.height + 10) s.y = -10;
+
+                const alpha = s.baseAlpha + 0.25 * Math.sin(s.pulse);
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${s.hue}, 60%, 80%, ${alpha})`;
+                ctx.fill();
+
+                // 亮星加光晕
+                if (s.r > 1.3) {
+                    const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 3);
+                    glow.addColorStop(0, `hsla(${s.hue}, 80%, 75%, ${alpha * 0.4})`);
+                    glow.addColorStop(1, 'transparent');
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
+                    ctx.fillStyle = glow;
+                    ctx.fill();
+                }
+            }
+
+            // 鼠标吸引：靠近指针的星星微微发光
+            if (mouse.x > -500) {
+                for (const s of stars) {
+                    const dx = s.x - mouse.x;
+                    const dy = s.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 150) {
+                        const strength = (1 - dist / 150) * 0.5;
+                        ctx.beginPath();
+                        ctx.arc(s.x, s.y, s.r + 2, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(180, 160, 255, ${strength})`;
+                        ctx.fill();
+                    }
+                }
+            }
+
             requestAnimationFrame(draw);
         }
 
@@ -296,6 +387,33 @@
         createStars();
         draw();
         window.addEventListener('resize', () => { resize(); createStars(); });
+        canvas.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        canvas.addEventListener('mouseleave', () => { mouse.x = -999; mouse.y = -999; });
+    })();
+    </script>
+
+    <!-- 指针跟随 -->
+    <script>
+    (function() {
+        const dot = document.getElementById('cursorDot');
+        const ring = document.getElementById('cursorRing');
+        let mx = -100, my = -100;
+        let rx = -100, ry = -100;
+
+        document.addEventListener('mousemove', e => {
+            mx = e.clientX; my = e.clientY;
+            dot.style.left = mx + 'px';
+            dot.style.top = my + 'px';
+        });
+
+        function animateRing() {
+            rx += (mx - rx) * 0.2;
+            ry += (my - ry) * 0.2;
+            ring.style.left = rx + 'px';
+            ring.style.top = ry + 'px';
+            requestAnimationFrame(animateRing);
+        }
+        animateRing();
     })();
     </script>
 </body>
