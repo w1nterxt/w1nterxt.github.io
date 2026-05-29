@@ -366,28 +366,43 @@
     })();
     </script>
 
+    <!-- 彗星拖尾 (全屏 canvas) -->
+    <canvas class="cursor-canvas" id="trailCanvas" style="z-index:9997;"></canvas>
+
     <!-- 星系指针 -->
     <script>
     (function() {
+        const tc = document.getElementById('trailCanvas');
+        const tctx = tc.getContext('2d');
         const c = document.getElementById('cursorCanvas');
         const ctx = c.getContext('2d');
         let mx = -200, my = -200;
         let smx = -200, smy = -200;
+        let pmx = -200, pmy = -200; // 上一帧位置（用于速度）
         let time = 0;
-        let targetProgress = 0;    // 目标: 0=普通, 1=悬停
-        let progress = 0;          // 当前插值
+        let targetProgress = 0;
+        let progress = 0;
         const size = 120;
+        const trailParticles = [];
+        const maxTrail = 60;
 
         c.width = size; c.height = size;
 
+        function resizeTrail() {
+            tc.width = window.innerWidth;
+            tc.height = window.innerHeight;
+        }
+        resizeTrail();
+        window.addEventListener('resize', resizeTrail);
+
         document.addEventListener('mousemove', e => {
+            pmx = mx; pmy = my;
             mx = e.clientX; my = e.clientY;
         });
         document.addEventListener('mouseleave', () => {
             mx = -200; my = -200;
         });
 
-        // 悬停检测
         document.querySelectorAll('a, button, .project-card').forEach(el => {
             el.addEventListener('mouseenter', () => { targetProgress = 1; });
             el.addEventListener('mouseleave', () => { targetProgress = 0; });
@@ -399,24 +414,68 @@
             time = t * 0.001;
             smx += (mx - smx) * 0.15;
             smy += (my - smy) * 0.15;
-            progress += (targetProgress - progress) * 0.07;  // 平滑过渡
+            progress += (targetProgress - progress) * 0.07;
 
             const cx = smx, cy = smy;
             c.style.left = (cx - size/2) + 'px';
             c.style.top  = (cy - size/2) + 'px';
 
             ctx.clearRect(0, 0, size, size);
+            tctx.clearRect(0, 0, tc.width, tc.height);
+
             if (mx < -100) { requestAnimationFrame(draw); return; }
 
+            // === 彗星拖尾粒子 ===
+            const trailAlpha = 1 - progress; // 悬停时拖尾渐隐
+            const dx = mx - pmx;
+            const dy = my - pmy;
+            const speed = Math.sqrt(dx * dx + dy * dy);
+
+            if (speed > 0.2 && trailAlpha > 0.02) {
+                // 沿移动方向散布粒子
+                const spawnCount = Math.min(Math.floor(speed * 0.4), 5);
+                for (let i = 0; i < spawnCount; i++) {
+                    const t = (i + 1) / (spawnCount + 1);
+                    trailParticles.push({
+                        x: mx - dx * t * 0.8,
+                        y: my - dy * t * 0.8,
+                        life: 1,
+                        decay: 0.012 + Math.random() * 0.025,
+                        size: 0.6 + Math.random() * 3.5,
+                        hue: 250 + Math.random() * 40,
+                        vx: (Math.random() - 0.5) * 0.6,
+                        vy: (Math.random() - 0.5) * 0.6
+                    });
+                }
+            }
+
+            // 绘制拖尾
+            for (let i = trailParticles.length - 1; i >= 0; i--) {
+                const pt = trailParticles[i];
+                pt.life -= pt.decay;
+                pt.x += pt.vx;
+                pt.y += pt.vy;
+                if (pt.life <= 0) { trailParticles.splice(i, 1); continue; }
+                const a = pt.life * trailAlpha;
+                const r = pt.size * pt.life;
+                tctx.beginPath();
+                tctx.arc(pt.x, pt.y, r, 0, Math.PI * 2);
+                tctx.fillStyle = `hsla(${pt.hue}, 70%, 75%, ${a})`;
+                tctx.fill();
+            }
+
+            // 限制粒子数量
+            while (trailParticles.length > maxTrail) trailParticles.shift();
+
+            // === 星系指针本体 ===
             const mid = size / 2;
             const p = progress;
 
-            // === 基础尺寸（普通小 → 悬停大）===
             const scale = lerp(0.75, 1.8, p);
             const ringR  = lerp(12, 26, p);
             const ringR2 = lerp(7, 16, p);
 
-            // === 光晕 ===
+            // 光晕
             const glowR = lerp(14, ringR + 14, p);
             const glowAlpha = lerp(0.12, 0.3, p);
             const glow = ctx.createRadialGradient(mid, mid, 0, mid, mid, glowR);
@@ -426,7 +485,7 @@
             ctx.fillStyle = glow;
             ctx.beginPath(); ctx.arc(mid, mid, glowR, 0, Math.PI * 2); ctx.fill();
 
-            // === 星环1 (外环) ===
+            // 星环1
             const ring1Alpha = lerp(0.2, 0.7, p);
             ctx.save();
             ctx.translate(mid, mid);
@@ -435,8 +494,6 @@
             ctx.strokeStyle = `rgba(160,130,255,${ring1Alpha})`;
             ctx.lineWidth = 1.2;
             ctx.beginPath(); ctx.arc(0, 0, ringR, 0, Math.PI * 2); ctx.stroke();
-
-            // 环上光点（数量随 p 增多：2 → 6）
             const dotCount1 = Math.round(lerp(2, 6, p));
             const dotAlpha1 = lerp(0.35, 0.95, p);
             for (let i = 0; i < dotCount1; i++) {
@@ -448,7 +505,7 @@
             }
             ctx.restore();
 
-            // === 星环2 (内环，悬停时才明显) ===
+            // 星环2
             const ring2Alpha = lerp(0.05, 0.5, p);
             ctx.save();
             ctx.translate(mid, mid);
@@ -457,7 +514,6 @@
             ctx.strokeStyle = `rgba(140,120,230,${ring2Alpha})`;
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.arc(0, 0, ringR2, 0, Math.PI * 2); ctx.stroke();
-
             const dotCount2 = Math.round(lerp(1, 4, p));
             const dotAlpha2 = lerp(0.15, 0.8, p);
             for (let i = 0; i < dotCount2; i++) {
@@ -469,7 +525,7 @@
             }
             ctx.restore();
 
-            // === 悬停专属：外围粒子环 ===
+            // 悬停专属外围粒子
             if (p > 0.05) {
                 const sparkCount = Math.floor(lerp(0, 8, p));
                 const sparkAlpha = lerp(0, 0.6, p);
@@ -483,8 +539,7 @@
                 }
             }
 
-            // === 中心星 ===
-            const starInner = lerp(4, 8, p);
+            // 中心星
             const starOuter = lerp(8, 14, p);
             const starGlow = ctx.createRadialGradient(mid, mid, 0, mid, mid, starOuter);
             starGlow.addColorStop(0, '#fff');
@@ -492,8 +547,6 @@
             starGlow.addColorStop(1, 'transparent');
             ctx.fillStyle = starGlow;
             ctx.beginPath(); ctx.arc(mid, mid, starOuter, 0, Math.PI * 2); ctx.fill();
-
-            // 中心实心点
             ctx.beginPath(); ctx.arc(mid, mid, lerp(2, 3, p), 0, Math.PI * 2);
             ctx.fillStyle = '#fff'; ctx.fill();
 
