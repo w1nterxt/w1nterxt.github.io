@@ -2,49 +2,141 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>w1nterxt - 个人主页</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>w1nterxt — CS Student & Builder</title>
+    <meta name="description" content="w1nterxt 的个人主页。计算机科学与技术在读，写代码、搭东西，对系统设计和开源充满热情。">
+    <meta property="og:title" content="w1nterxt">
+    <meta property="og:description" content="CS 在读。写代码、搭东西，能用脚本解决的绝不动手。">
+    <meta property="og:image" content="https://w1nterxt.github.io/avatar.svg">
+    <meta property="og:url" content="https://w1nterxt.github.io">
+    <meta property="og:type" content="website">
+    <link rel="icon" type="image/svg+xml" href="avatar.svg">
     <style>
-        /* ===== CSS Variables — 改这里就能换主题 ===== */
+        /* ===== CSS Variables — 暖冷双色系 Token ===== */
         :root {
-            --bg: #0f0f1a;
-            --bg-card: #1a1a2e;
-            --text: #e0e0e0;
-            --text-dim: #8892b0;
-            --accent: #6c63ff;
-            --accent-glow: rgba(108, 99, 255, 0.3);
-            --border: rgba(255, 255, 255, 0.06);
+            /* 背景：暖调暗色，降低冷光刺激 */
+            --bg-deep: #100f18;
+            --bg: #171622;
+            --bg-card: #1e1d2d;
+            --bg-card-alt: #1b1a2a;
+            --bg-warm: #1f1c25;
+            /* 文字：暖白 → 暖灰 → 暖深灰 */
+            --text: #eae6f2;
+            --text-dim: #a59eb8;
+            --text-muted: #706b82;
+            /* 边框 */
+            --border-subtle: rgba(255,255,255,0.06);
+            --border: rgba(255,255,255,0.10);
+            --border-emphasis: rgba(147,130,255,0.35);
+            /* 品牌色 — 双色系 */
+            --accent: #9382ff;              /* 柔和紫 */
+            --accent-glow: rgba(147,130,255,0.25);
+            --accent-warm: #e8a850;         /* 暖金 */
+            --accent-warm-glow: rgba(232,168,80,0.22);
+            --teal: #5ec4b8;                /* 柔和青 */
+            --teal-glow: rgba(94,196,184,0.2);
+            --rose: #e87d8a;                /* 柔和玫红 */
+            /* 布局 */
             --radius: 12px;
-            --max-width: 900px;
+            --max-width: 960px;
         }
 
-        /* ===== Reset ===== */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-            background: radial-gradient(ellipse at 50% 0%, #1a1a3e 0%, var(--bg) 60%);
+            background: radial-gradient(ellipse at 50% 0%, #2c2438 0%, var(--bg-deep) 35%, var(--bg) 70%);
             color: var(--text);
             line-height: 1.7;
             min-height: 100vh;
             overflow-x: hidden;
-            cursor: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        @media (pointer: fine) {
+            body { cursor: none; }
         }
 
-        /* 星系指针 */
         .cursor-canvas {
-            position: fixed; z-index: 9999;
-            pointer-events: none;
-            top: 0; left: 0;
+            position: fixed; z-index: 9999; pointer-events: none; top: 0; left: 0;
         }
 
-        /* ===== 星空背景 ===== */
+        /* ===== 滚动进度条 ===== */
+        .scroll-progress {
+            position: fixed; left: 0; height: 2px;
+            background: linear-gradient(to right, var(--accent-warm), var(--accent), var(--teal));
+            z-index: 10001; width: 0%;
+            transition: width 0.15s linear;
+            border-radius: 0 2px 2px 0;
+            /* iOS 刘海屏安全区适配 */
+            top: env(safe-area-inset-top, 0px);
+        }
+
         .stars {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 0;
         }
 
-        /* ===== 主容器 ===== */
+        /* ===== 氛围光晕 — 大尺寸模糊光球填充空白区域 ===== */
+        .ambient-orb {
+            position: fixed; pointer-events: none; z-index: 0;
+            border-radius: 50%; filter: blur(120px);
+        }
+        .ambient-orb--top-right {
+            width: 520px; height: 520px;
+            top: -12%; right: -10%;
+            background: radial-gradient(circle at 60% 40%, var(--accent-warm) 0%, transparent 70%);
+            opacity: 0.10;
+        }
+        .ambient-orb--mid-left {
+            width: 440px; height: 440px;
+            top: 38%; left: -8%;
+            background: radial-gradient(circle at 40% 50%, var(--accent) 0%, transparent 70%);
+            opacity: 0.09;
+        }
+        .ambient-orb--bottom-right {
+            width: 400px; height: 400px;
+            bottom: 3%; right: -6%;
+            background: radial-gradient(circle at 50% 50%, var(--teal) 0%, transparent 70%);
+            opacity: 0.08;
+        }
+        .ambient-orb--center-glow {
+            width: 320px; height: 320px;
+            top: 22%; left: 50%; transform: translateX(-50%);
+            background: radial-gradient(circle at 50% 40%, var(--rose) 0%, transparent 70%);
+            opacity: 0.06;
+        }
+
+        /* ===== 侧边装饰线 — 纵向渐变画框结构线 ===== */
+        .side-line {
+            position: fixed; top: 0;
+            width: 1px; height: 100vh;
+            pointer-events: none; z-index: 1;
+            opacity: 0.28;
+        }
+        .side-line--left {
+            left: max(24px, calc((100vw - var(--max-width)) / 2 - 40px));
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                var(--accent-warm) 12%, var(--accent) 40%,
+                var(--teal) 65%, var(--accent-warm) 88%,
+                transparent 100%);
+        }
+        .side-line--right {
+            right: max(24px, calc((100vw - var(--max-width)) / 2 - 40px));
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                var(--accent-warm) 12%, var(--accent) 40%,
+                var(--teal) 65%, var(--accent-warm) 88%,
+                transparent 100%);
+        }
+
+        /* 小屏隐藏侧线（没空间画框） */
+        @media (max-width: 1040px) {
+            .side-line { display: none; }
+        }
+
         .container {
             position: relative; z-index: 1;
             max-width: var(--max-width); margin: 0 auto; padding: 0 24px;
@@ -53,92 +145,141 @@
         /* ===== 导航 ===== */
         nav {
             display: flex; justify-content: flex-end; gap: 28px;
-            padding: 20px 0; font-size: 0.95rem;
+            font-size: 0.95rem;
             position: sticky; top: 0; z-index: 10;
-            backdrop-filter: blur(10px);
-            background: rgba(15, 15, 26, 0.6);
+            backdrop-filter: blur(16px) saturate(1.2);
+            -webkit-backdrop-filter: blur(16px) saturate(1.2);
+            background: rgba(23,22,34,0.78);
             margin: 0 -24px; padding: 16px 24px;
+            border-bottom: 1px solid var(--border-subtle);
         }
-        nav a { color: var(--text-dim); text-decoration: none; transition: color 0.2s; cursor: none; }
-        nav a:hover { color: var(--accent); }
-        a, button, .project-card { cursor: none !important; }
+        nav a {
+            color: var(--text-dim); text-decoration: none; transition: color 0.25s, text-shadow 0.25s;
+            padding-bottom: 2px; border-bottom: 2px solid transparent;
+        }
+        @media (pointer: fine) { nav a { cursor: none; } }
+        nav a:hover { color: var(--text); }
+        nav a.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            text-shadow: 0 0 12px var(--accent-glow);
+        }
+        @media (pointer: fine) {
+            a, button, .project-card,
+            .book-card, .media-card-editable, .add-card-btn { cursor: none !important; }
+        }
 
         /* ===== Hero ===== */
         .hero {
-            padding: 100px 0 60px; text-align: center;
+            padding: 140px 0 70px; text-align: center;
+            position: relative;
+        }
+        .hero::after {
+            content: ""; position: absolute; bottom: 0; left: 0; right: 0;
+            height: 80px;
+            background: linear-gradient(to bottom, transparent, var(--bg-deep));
+            pointer-events: none;
         }
         .hero .avatar {
-            width: 96px; height: 96px; border-radius: 50%;
+            width: 112px; height: 112px; border-radius: 50%;
             border: 3px solid var(--accent);
-            box-shadow: 0 0 24px var(--accent-glow);
-            margin-bottom: 20px; display: block;
+            box-shadow: 0 0 32px var(--accent-glow), 0 0 64px rgba(232,168,80,0.08);
+            margin-bottom: 18px; display: block;
             margin-left: auto; margin-right: auto;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .hero .avatar:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 48px rgba(147,130,255,0.45), 0 0 80px rgba(232,168,80,0.15);
         }
         .hero h1 {
             font-size: clamp(2.2rem, 5vw, 3.5rem);
-            font-weight: 800; margin-bottom: 12px;
-            background: linear-gradient(135deg, var(--accent), #a78bfa, #67e8f9);
+            font-weight: 800; margin-bottom: 8px;
+            letter-spacing: 0;
+            background: linear-gradient(135deg, var(--accent), #c4a0ff, var(--teal), var(--accent-warm));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .hero .subtitle {
-            color: var(--text-dim); font-size: 1.15rem; margin-bottom: 8px;
-        }
-        .hero .tagline {
+        .hero .bio {
             color: var(--text-dim); font-size: 0.95rem;
-            opacity: 0.7; max-width: 500px; margin: 0 auto;
+            margin-bottom: 20px; letter-spacing: 0.02em;
+        }
+
+        /* ===== 状态徽章 ===== */
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(94,196,184,0.1);
+            border: 1px solid rgba(94,196,184,0.25);
+            border-radius: 20px; padding: 4px 14px 4px 8px;
+            font-size: 0.8rem; color: var(--teal);
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+        .status-badge:hover {
+            background: rgba(94,196,184,0.18);
+            border-color: var(--teal);
+        }
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--teal);
+            box-shadow: 0 0 6px var(--teal);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { box-shadow: 0 0 4px var(--teal); }
+            50% { box-shadow: 0 0 12px var(--teal), 0 0 20px rgba(94,196,184,0.4); }
+        }
+
+        /* ===== 轮播标语 ===== */
+        .tagline-wrap {
+            position: relative; height: 28px; overflow: hidden;
+            max-width: 400px; margin: 0 auto;
+        }
+        .tagline-item {
+            position: absolute; width: 100%; left: 0;
+            color: var(--text-dim); font-size: 0.95rem;
+            opacity: 0; transform: translateY(12px);
+            transition: opacity 0.6s, transform 0.6s;
+        }
+        .tagline-item.active {
+            opacity: 0.8; transform: translateY(0);
         }
 
         /* ===== 区块标题 ===== */
         .section {
-            padding: 60px 0;
+            padding: 80px 0;
+        }
+        .section-alt {
+            background: linear-gradient(180deg, transparent 0%, var(--bg-warm) 15%, var(--bg-warm) 85%, transparent 100%);
+            margin: 0 -24px; padding-left: 24px; padding-right: 24px;
         }
         .section-title {
-            font-size: 1.5rem; font-weight: 700; margin-bottom: 32px;
+            font-size: 1.5rem; font-weight: 700; margin-bottom: 40px;
             display: flex; align-items: center; gap: 12px;
         }
         .section-title::after {
             content: ""; flex: 1; height: 1px;
-            background: var(--border); max-width: 200px;
-        }
-
-        /* ===== 关于我 ===== */
-        .about-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 32px;
-        }
-        .about-card p { margin-bottom: 12px; }
-        .about-card p:last-child { margin-bottom: 0; }
-
-        /* ===== 技能标签 ===== */
-        .skills-grid {
-            display: flex; flex-wrap: wrap; gap: 10px;
-        }
-        .skill-tag {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 20px; padding: 8px 18px;
-            font-size: 0.9rem; color: var(--text-dim);
-            transition: all 0.25s; cursor: default;
-        }
-        .skill-tag:hover {
-            border-color: var(--accent); color: var(--accent);
-            box-shadow: 0 0 20px var(--accent-glow);
+            background: linear-gradient(to right, var(--border), transparent);
+            max-width: 300px;
         }
 
         /* ===== 项目卡片 ===== */
         .projects-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 20px;
+            gap: 24px;
         }
         .project-card {
             background: var(--bg-card); border: 1px solid var(--border);
+            border-left: 3px solid transparent;
             border-radius: var(--radius); padding: 28px;
-            transition: transform 0.25s, box-shadow 0.25s;
+            transition: transform 0.25s, box-shadow 0.25s, border-left-color 0.3s;
             text-decoration: none; color: var(--text); display: block;
         }
         .project-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 30px var(--accent-glow);
-            border-color: var(--accent);
+            box-shadow: 0 8px 30px var(--accent-glow), 0 2px 12px var(--accent-warm-glow);
+            border-color: var(--border-emphasis);
+            border-left-color: var(--accent-warm);
         }
         .project-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
         .project-card p {
@@ -149,8 +290,248 @@
         }
         .project-card .mini-tag {
             font-size: 0.75rem; padding: 3px 10px;
-            border-radius: 10px; background: rgba(108, 99, 255, 0.15);
+            border-radius: 10px; background: rgba(147,130,255,0.12);
             color: var(--accent);
+        }
+        .project-card .mini-tag:nth-child(2) {
+            background: rgba(232,168,80,0.12); color: var(--accent-warm);
+        }
+        .project-card .mini-tag:nth-child(3) {
+            background: rgba(94,196,184,0.12); color: var(--teal);
+        }
+
+        /* ===== 技术栈标签云 ===== */
+        .tech-cloud {
+            display: flex; flex-wrap: wrap; gap: 10px;
+        }
+        .tech-pill {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 8px 18px;
+            font-size: 0.88rem; color: var(--text-dim);
+            transition: all 0.25s; cursor: default;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .tech-pill:hover {
+            color: var(--accent); border-color: var(--border-emphasis);
+            background: rgba(147,130,255,0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+        .tech-pill:nth-child(3n+1):hover {
+            color: var(--accent-warm); border-color: rgba(232,168,80,0.35);
+            background: rgba(232,168,80,0.08);
+            box-shadow: 0 4px 16px var(--accent-warm-glow);
+        }
+        .tech-pill:nth-child(3n+2):hover {
+            color: var(--teal); border-color: rgba(94,196,184,0.35);
+            background: rgba(94,196,184,0.08);
+            box-shadow: 0 4px 16px var(--teal-glow);
+        }
+        @media (pointer: fine) { .tech-pill { cursor: none; } }
+
+        @media (pointer: fine) { .book-card, .universe-card, .media-card, .media-card-editable { cursor: none; } }
+
+        /* ===== 兴趣内容扩展 — 书单 / 文化宇宙 / 追番 / 游戏 ===== */
+        .subsection-title {
+            font-size: 0.82rem; font-weight: 600;
+            color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 40px 0 16px;
+        }
+        .subsection-title:first-of-type { margin-top: 0; }
+
+        /* 书单卡片 — 紧凑版 */
+        .books-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+        .book-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 16px;
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.3s;
+            position: relative; overflow: hidden;
+        }
+        .book-card::before {
+            content: ""; position: absolute; top: 0; left: 0;
+            width: 100%; height: 2px;
+            background: linear-gradient(to right, var(--accent), var(--accent-warm));
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .book-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px var(--accent-glow);
+            border-color: var(--border-emphasis);
+        }
+        .book-card:hover::before { opacity: 1; }
+        .book-card__head {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 2px;
+        }
+        .book-card__title {
+            font-size: 0.92rem; font-weight: 700; color: var(--text);
+            flex: 1; min-width: 0;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .book-card__head .star-display {
+            flex-shrink: 0; margin-bottom: 0; font-size: 0.72rem; gap: 1px;
+        }
+        .book-card__author {
+            font-size: 0.74rem; color: var(--text-muted); margin-bottom: 8px;
+        }
+        .book-card__tags {
+            display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;
+        }
+        .book-card__tag {
+            font-size: 0.68rem; padding: 1px 8px;
+            border-radius: 8px; background: rgba(147,130,255,0.1);
+            color: var(--accent);
+        }
+        .book-card__tag:nth-child(2) {
+            background: rgba(232,168,80,0.1); color: var(--accent-warm);
+        }
+        .book-card__tag:nth-child(3) {
+            background: rgba(94,196,184,0.1); color: var(--teal);
+        }
+        .book-card__note {
+            font-size: 0.76rem; color: var(--text-dim); line-height: 1.6;
+            border-left: 2px solid var(--border);
+            padding-left: 10px;
+        }
+
+        /* 文化宇宙卡片 */
+        .universe-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .universe-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 24px;
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.3s;
+            border-left: 3px solid var(--teal);
+        }
+        .universe-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 24px var(--teal-glow);
+            border-color: var(--border-emphasis);
+            border-left-color: var(--accent);
+        }
+        .universe-card__title {
+            font-size: 1.05rem; font-weight: 700; margin-bottom: 8px;
+            color: var(--text);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .universe-card__icon { font-size: 1.3rem; }
+        .universe-card__desc {
+            font-size: 0.84rem; color: var(--text-dim); line-height: 1.7;
+        }
+
+        /* 在看在玩游戏卡片 */
+        .media-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        .media-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 18px 22px;
+            display: flex; align-items: center; gap: 14px;
+            transition: transform 0.25s, box-shadow 0.25s;
+            text-decoration: none; color: inherit;
+        }
+        a.media-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px var(--accent-warm-glow);
+            border-color: var(--border-emphasis);
+        }
+        .media-card__icon {
+            font-size: 1.5rem; flex-shrink: 0;
+            width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
+            background: rgba(147,130,255,0.08); border-radius: 10px;
+        }
+        .media-card__info { flex: 1; }
+        .media-card__title {
+            font-size: 0.95rem; font-weight: 700; color: var(--text);
+        }
+        .media-card__sub {
+            font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;
+        }
+        .media-card__arrow {
+            font-size: 0.8rem; color: var(--text-muted);
+            transition: transform 0.25s, color 0.25s;
+        }
+        a.media-card:hover .media-card__arrow {
+            transform: translateX(3px);
+            color: var(--accent-warm);
+        }
+
+        /* ===== Steam 游戏库 ===== */
+        .steam-profile {
+            display: flex; align-items: center; gap: 16px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px 24px;
+            margin-bottom: 20px;
+        }
+        .steam-profile__avatar {
+            width: 52px; height: 52px; border-radius: 50%;
+            border: 2px solid var(--border-emphasis);
+            flex-shrink: 0;
+        }
+        .steam-profile__info { flex: 1; }
+        .steam-profile__name {
+            font-size: 1rem; font-weight: 700; color: var(--text);
+        }
+        .steam-profile__stats {
+            font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;
+        }
+        .steam-profile__stats span { color: var(--accent); font-weight: 600; }
+        .steam-profile__link {
+            font-size: 0.82rem; color: var(--accent-warm);
+            text-decoration: none; font-weight: 600;
+            white-space: nowrap;
+            transition: color 0.2s;
+        }
+        .steam-profile__link:hover { color: var(--accent); }
+
+        .steam-games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 12px;
+        }
+        .steam-game {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; overflow: hidden;
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.3s;
+            text-decoration: none; display: block;
+        }
+        .steam-game:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 18px var(--accent-glow);
+            border-color: var(--border-emphasis);
+        }
+        .steam-game__header {
+            width: 100%; aspect-ratio: 460/215;
+            object-fit: cover; display: block;
+            background: var(--bg);
+        }
+        .steam-game__body {
+            padding: 10px 12px 12px;
+        }
+        .steam-game__name {
+            font-size: 0.8rem; font-weight: 600; color: var(--text);
+            line-height: 1.3; margin-bottom: 4px;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .steam-game__hours {
+            font-size: 0.72rem; color: var(--accent-warm);
+            font-weight: 600;
+        }
+
+        /* ===== 滚动入场动画 ===== */
+        .reveal {
+            opacity: 0; transform: translateY(24px);
+            transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+        }
+        .reveal.visible {
+            opacity: 1; transform: translateY(0);
         }
 
         /* ===== 联系 ===== */
@@ -165,26 +546,938 @@
             transition: all 0.25s; font-size: 0.95rem;
         }
         .contact-link:hover {
-            border-color: var(--accent); color: var(--accent);
+            border-color: var(--border-emphasis); color: var(--accent);
         }
         .contact-link svg { width: 20px; height: 20px; flex-shrink: 0; }
 
         /* ===== Footer ===== */
         footer {
-            text-align: center; padding: 40px 0 30px;
+            position: relative;
+            text-align: center; padding: 50px 0 40px;
             color: var(--text-dim); font-size: 0.85rem; opacity: 0.6;
+            /* iOS 底部安全区 */
+            padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+        }
+        footer::before {
+            content: ""; display: block;
+            width: 200px; height: 1px;
+            margin: 0 auto 36px;
+            background: linear-gradient(to right, transparent, var(--accent-warm), var(--accent), transparent);
+            opacity: 0.5;
         }
 
-        /* ===== 响应式 ===== */
-        @media (max-width: 600px) {
-            nav { justify-content: center; gap: 20px; }
-            .hero { padding: 60px 0 40px; }
-            .section { padding: 40px 0; }
-            .projects-grid { grid-template-columns: 1fr; }
+        /* ================================================================
+           响应式系统 — 三层断点：移动 (<768) / 平板 (768–1024) / 桌面 (>1024)
+           ================================================================ */
+
+        /* ---------- 平板断点：iPad / Surface 等 ---------- */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .hero {
+                padding: 110px 0 55px;
+            }
+            .hero h1 {
+                font-size: 2.6rem;
+            }
+            .hero .avatar {
+                width: 100px; height: 100px;
+            }
+            .section {
+                padding: 60px 0;
+            }
+            .section-title {
+                font-size: 1.35rem;
+            }
+            .projects-grid {
+                gap: 20px;
+            }
+            /* 氛围光晕缩小，占性能少 */
+            .ambient-orb--top-right {
+                width: 380px; height: 380px;
+                opacity: 0.07;
+            }
+            .ambient-orb--mid-left {
+                width: 320px; height: 320px;
+                opacity: 0.06;
+            }
+            .ambient-orb--bottom-right {
+                width: 300px; height: 300px;
+                opacity: 0.05;
+            }
+            .ambient-orb--center-glow {
+                width: 240px; height: 240px;
+                opacity: 0.04;
+            }
+        }
+
+        /* ---------- 移动端断点：手机 ---------- */
+        @media (max-width: 767px) {
+            /* 容器左右留白收紧 */
+            .container {
+                padding: 0 16px;
+            }
+
+            /* 导航 — 居中 + 等距 */
+            nav {
+                justify-content: center;
+                gap: 16px;
+                padding: 12px 16px;
+                margin: 0 -16px;
+                font-size: 0.88rem;
+                backdrop-filter: blur(12px) saturate(1);
+                -webkit-backdrop-filter: blur(12px) saturate(1);
+                /* iOS 安全区适配 */
+                padding-top: max(12px, env(safe-area-inset-top));
+            }
+            nav a {
+                padding: 6px 4px;
+            }
+
+            /* Hero 压缩 */
+            .hero {
+                padding: 60px 0 30px;
+            }
+            .hero::after {
+                height: 50px;
+            }
+            .hero .avatar {
+                width: 80px; height: 80px;
+                border-width: 2px;
+            }
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            .hero .bio {
+                font-size: 0.82rem;
+            }
+
+            /* 状态徽章缩小 */
+            .status-badge {
+                font-size: 0.75rem;
+                padding: 3px 12px 3px 7px;
+                gap: 6px;
+            }
+            .status-dot {
+                width: 6px; height: 6px;
+            }
+
+            /* 轮播标语 */
+            .tagline-wrap {
+                max-width: 280px;
+            }
+            .tagline-item {
+                font-size: 0.82rem;
+            }
+
+            /* 区块紧缩 */
+            .section {
+                padding: 40px 0;
+            }
+            .section-alt {
+                margin: 0 -16px;
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+            .section-title {
+                font-size: 1.15rem;
+                margin-bottom: 28px;
+                gap: 10px;
+            }
+
+            /* 项目卡片 — 强制单列 */
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .project-card {
+                padding: 20px;
+            }
+            .project-card h3 {
+                font-size: 1rem;
+            }
+            .project-card p {
+                font-size: 0.82rem;
+            }
+            .project-card .mini-tag {
+                font-size: 0.7rem;
+                padding: 2px 8px;
+            }
+
+            /* 技术栈标签云 — 更小间距 */
+            .tech-cloud {
+                gap: 8px;
+            }
+            .tech-pill {
+                font-size: 0.8rem;
+                padding: 6px 14px;
+            }
+
+            /* 兴趣内容 — 移动端单列 */
+            .books-grid,
+            .universe-grid { grid-template-columns: 1fr; gap: 10px; }
+            .media-grid { grid-template-columns: 1fr; gap: 10px; }
+            .book-card, .universe-card { padding: 14px; }
+            .book-card__note { font-size: 0.74rem; }
+            .subsection-title { margin: 30px 0 12px; }
+            /* Steam 移动端 */
+            .steam-profile { flex-wrap: wrap; padding: 16px; gap: 12px; }
+            .steam-profile__link { width: 100%; text-align: right; }
+            .steam-games-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .steam-game__body { padding: 8px 10px 10px; }
+            .steam-game__name { font-size: 0.75rem; }
+
+            /* 联系 — 纵向堆叠 */
+            .contact-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .contact-link {
+                padding: 12px 18px;
+                font-size: 0.88rem;
+            }
+            .contact-link svg {
+                width: 18px; height: 18px;
+            }
+
+            /* Footer 紧凑 */
+            footer {
+                padding: 36px 0 30px;
+                font-size: 0.78rem;
+            }
+            footer::before {
+                width: 100px;
+                margin-bottom: 24px;
+            }
+        }
+
+        /* ---------- 小屏手机优化 (< 400px) ---------- */
+        @media (max-width: 399px) {
+            nav {
+                gap: 10px;
+                font-size: 0.82rem;
+            }
+            .hero {
+                padding: 44px 0 22px;
+            }
+            .hero .avatar {
+                width: 68px; height: 68px;
+            }
+            .hero h1 {
+                font-size: 1.55rem;
+            }
+            .hero .bio {
+                font-size: 0.78rem;
+            }
+            .section {
+                padding: 32px 0;
+            }
+            .section-title {
+                font-size: 1.05rem;
+            }
+            .tech-pill {
+                font-size: 0.76rem;
+                padding: 5px 12px;
+            }
+            .project-card {
+                padding: 16px;
+            }
+            .steam-games-grid { grid-template-columns: repeat(2, 1fr); }
+            footer::before {
+                width: 80px;
+            }
+        }
+
+        /* ---------- 氛围光晕：移动端大幅缩小（性能 & 视觉） ---------- */
+        @media (max-width: 767px) {
+            .ambient-orb--top-right {
+                width: 260px; height: 260px;
+                top: -5%; right: -18%;
+                opacity: 0.07;
+                filter: blur(80px);
+            }
+            .ambient-orb--mid-left {
+                width: 220px; height: 220px;
+                opacity: 0.06;
+                filter: blur(80px);
+            }
+            .ambient-orb--bottom-right {
+                width: 200px; height: 200px;
+                bottom: 5%; right: -15%;
+                opacity: 0.05;
+                filter: blur(80px);
+            }
+            .ambient-orb--center-glow {
+                width: 160px; height: 160px;
+                opacity: 0.04;
+                filter: blur(80px);
+            }
+        }
+
+        /* ===== 触摸设备 ===== */
+        @media (pointer: coarse) {
+            /* 恢复原生光标 */
+            body { cursor: auto; }
+            a, button, .project-card, .book-card, .universe-card, .media-card, .media-card-editable, .tech-pill,
+            .contact-link, nav a { cursor: pointer !important; }
+            /* 隐藏自定义指针 canvas */
+            #cursorCanvas, #trailCanvas { display: none; }
+            /* 触摸目标至少 44px */
+            nav a {
+                min-height: 44px; display: flex; align-items: center;
+            }
+            .tech-pill {
+                min-height: 40px; display: inline-flex; align-items: center;
+            }
+            .contact-link {
+                min-height: 48px;
+            }
+            /* 抑制 hover 粘滞效果 (iOS touch 后伪 :hover 残留) */
+            @media (hover: none) {
+                .project-card:hover {
+                    transform: none;
+                    box-shadow: none;
+                    border-color: var(--border);
+                    border-left-color: transparent;
+                }
+                .tech-pill:hover {
+                    color: var(--text-dim);
+                    border-color: var(--border);
+                    background: var(--bg-card);
+                    transform: none;
+                    box-shadow: none;
+                }
+                .book-card:hover, .universe-card:hover, .media-card:hover, .media-card-editable:hover {
+                    color: var(--text-dim);
+                    border-color: var(--border);
+                    transform: none;
+                    box-shadow: none;
+                    background: var(--bg-card);
+                }
+            }
+        }
+
+        /* ===== 无障碍：减少动画偏好 ===== */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            #cursorCanvas, #trailCanvas { display: none; }
+            body { cursor: auto; }
+            a, button, .project-card, .book-card, .universe-card, .media-card, .media-card-editable, .tech-pill,
+            .contact-link { cursor: pointer !important; }
+        }
+
+        /* ================================================================
+           可编辑收藏系统 — 书单 / 片单 / 番单 + Steam 统计
+           ================================================================ */
+        /* 添加按钮 */
+        .add-card-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            margin-top: 20px; padding: 12px 24px;
+            background: transparent; border: 1px dashed var(--border);
+            border-radius: var(--radius); color: var(--text-dim);
+            font-size: 0.9rem; cursor: pointer;
+            transition: all 0.25s;
+            font-family: inherit;
+        }
+        .add-card-btn:hover {
+            border-color: var(--accent); color: var(--accent);
+            background: rgba(147,130,255,0.06);
+        }
+
+        /* 卡片操作按钮（编辑/删除） */
+        .card-actions {
+            position: absolute; top: 8px; right: 8px;
+            display: flex; gap: 4px;
+            opacity: 0; transition: opacity 0.2s;
+            z-index: 2;
+        }
+        .book-card:hover .card-actions,
+        .media-card-editable:hover .card-actions {
+            opacity: 1;
+        }
+        .card-actions button {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 1px solid var(--border); background: var(--bg-card);
+            color: var(--text-dim); font-size: 0.75rem;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; transition: all 0.2s;
+            font-family: inherit; line-height: 1;
+        }
+        .card-actions .btn-edit:hover {
+            border-color: var(--accent); color: var(--accent);
+            background: rgba(147,130,255,0.1);
+        }
+        .card-actions .btn-delete:hover {
+            border-color: var(--rose); color: var(--rose);
+            background: rgba(232,125,138,0.1);
+        }
+
+        /* 状态徽章 */
+        .card-status {
+            display: inline-block; font-size: 0.7rem; padding: 2px 10px;
+            border-radius: 10px; margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .card-status--done { background: rgba(94,196,184,0.12); color: var(--teal); }
+        .card-status--reading { background: rgba(147,130,255,0.12); color: var(--accent); }
+        .card-status--wish { background: rgba(232,168,80,0.12); color: var(--accent-warm); }
+
+        /* 星级评分展示 */
+        .star-display {
+            display: flex; gap: 1px; font-size: 0.8rem;
+        }
+        .star-display .star-on { color: var(--accent-warm); }
+        .star-display .star-off { color: var(--text-muted); opacity: 0.25; }
+
+        /* 片单/番单卡片 */
+        .media-grid-wide {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .media-card-editable {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 24px;
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.3s;
+            position: relative;
+        }
+        .media-card-editable:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 24px var(--accent-glow);
+            border-color: var(--border-emphasis);
+        }
+        .media-card-editable__head {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+        }
+        .media-card-editable__title {
+            font-size: 1.05rem; font-weight: 700; color: var(--text);
+            flex: 1; min-width: 0;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .media-card-editable__head .star-display {
+            flex-shrink: 0; margin-bottom: 0; font-size: 0.78rem; gap: 2px;
+        }
+        .media-card-editable__meta {
+            font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px;
+        }
+        .media-card-editable__tags {
+            display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px;
+        }
+        .media-card-editable__tag {
+            font-size: 0.72rem; padding: 2px 10px;
+            border-radius: 10px; background: rgba(147,130,255,0.1);
+            color: var(--accent);
+        }
+        .media-card-editable__tag:nth-child(2n) {
+            background: rgba(232,168,80,0.1); color: var(--accent-warm);
+        }
+        .media-card-editable__tag:nth-child(3n) {
+            background: rgba(94,196,184,0.1); color: var(--teal);
+        }
+        .media-card-editable__note {
+            font-size: 0.84rem; color: var(--text-dim); line-height: 1.7;
+            border-left: 2px solid var(--border); padding-left: 12px; margin-top: 8px;
+        }
+
+        /* ===== 编辑弹窗 ===== */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 100000;
+            background: rgba(5,4,10,0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.25s, visibility 0.25s;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal {
+            background: var(--bg-card); border: 1px solid var(--border-emphasis);
+            border-radius: var(--radius); padding: 32px; width: 90%;
+            max-width: 480px; max-height: 85vh; overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .modal-overlay.active .modal { transform: translateY(0); }
+        .modal h3 {
+            font-size: 1.2rem; font-weight: 700; margin-bottom: 24px;
+            color: var(--text);
+        }
+        .modal .form-group { margin-bottom: 18px; }
+        .modal .form-group label {
+            display: block; font-size: 0.78rem; color: var(--text-muted);
+            margin-bottom: 6px; font-weight: 600; letter-spacing: 0.04em;
+        }
+        .modal .form-group input,
+        .modal .form-group textarea,
+        .modal .form-group select {
+            width: 100%; padding: 10px 14px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text); font-size: 0.9rem;
+            font-family: inherit; outline: none;
+            transition: border-color 0.2s;
+        }
+        .modal .form-group input:focus,
+        .modal .form-group textarea:focus,
+        .modal .form-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .modal .form-group textarea { resize: vertical; min-height: 80px; }
+        .modal .form-group select { cursor: pointer; }
+        .modal .form-actions {
+            display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;
+        }
+        .modal .btn {
+            padding: 10px 24px; border-radius: 8px; font-size: 0.9rem;
+            font-family: inherit; cursor: pointer; transition: all 0.2s;
+            border: 1px solid var(--border);
+        }
+        .modal .btn-cancel {
+            background: transparent; color: var(--text-dim);
+        }
+        .modal .btn-cancel:hover { border-color: var(--text-muted); color: var(--text); }
+        .modal .btn-save {
+            background: var(--accent); color: #fff; border-color: var(--accent);
+            font-weight: 600;
+        }
+        .modal .btn-save:hover {
+            background: #a899ff; box-shadow: 0 4px 16px var(--accent-glow);
+        }
+        .modal .btn-delete-item {
+            background: transparent; color: var(--rose); border-color: transparent;
+            margin-right: auto;
+        }
+        .modal .btn-delete-item:hover {
+            background: rgba(232,125,138,0.1); border-color: var(--rose);
+        }
+
+        /* 弹窗内星级评分交互 */
+        .star-input { display: flex; gap: 4px; font-size: 1.3rem; cursor: pointer; user-select: none; }
+        .star-input .star { color: var(--text-muted); transition: color 0.15s; }
+        .star-input .star.active { color: var(--accent-warm); }
+        .star-input:hover .star { color: var(--accent-warm); }
+        .star-input .star:hover ~ .star { color: var(--text-muted); }
+
+        /* 标签输入 */
+        .tag-input-wrap {
+            display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 10px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 8px; min-height: 42px; align-items: center;
+            transition: border-color 0.2s;
+        }
+        .tag-input-wrap:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .tag-input-wrap .tag-chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 8px; background: rgba(147,130,255,0.12);
+            border-radius: 8px; font-size: 0.78rem; color: var(--accent);
+        }
+        .tag-input-wrap .tag-chip .tag-remove {
+            cursor: pointer; font-size: 0.7rem; opacity: 0.6; line-height: 1;
+        }
+        .tag-input-wrap .tag-chip .tag-remove:hover { opacity: 1; color: var(--rose); }
+        .tag-input-wrap input {
+            flex: 1; min-width: 80px; border: none; outline: none;
+            background: transparent; color: var(--text); font-size: 0.85rem;
+            font-family: inherit; padding: 4px 0;
+        }
+
+        /* ================================================================
+           Steam 统计面板
+           ================================================================ */
+        .stats-dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px; margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+        .stat-card:hover { border-color: var(--border-emphasis); }
+        .stat-card__value {
+            font-size: 1.8rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent-warm));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-card__label {
+            font-size: 0.75rem; color: var(--text-muted);
+            margin-top: 4px; letter-spacing: 0.04em;
+        }
+
+        /* 时长分布条 */
+        .playtime-dist {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 24px;
+            margin-bottom: 24px;
+        }
+        .playtime-dist__title {
+            font-size: 0.82rem; font-weight: 600; color: var(--text-muted);
+            margin-bottom: 14px; letter-spacing: 0.04em;
+        }
+        .playtime-dist__bar {
+            display: flex; height: 24px; border-radius: 6px; overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .playtime-dist__bar-seg {
+            transition: flex 0.5s ease-out;
+        }
+        .playtime-dist__legend {
+            display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.78rem;
+            color: var(--text-dim);
+        }
+        .playtime-dist__legend span { display: flex; align-items: center; gap: 6px; }
+        .playtime-dist__legend .dot {
+            width: 10px; height: 10px; border-radius: 2px; display: inline-block;
+            flex-shrink: 0;
+        }
+
+        /* 响应式：统计面板与编辑卡片 */
+        @media (max-width: 767px) {
+            .stats-dashboard { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .stat-card { padding: 14px; }
+            .stat-card__value { font-size: 1.4rem; }
+            .media-grid-wide { grid-template-columns: 1fr; gap: 14px; }
+            .modal { padding: 24px; width: 95%; }
+            .playtime-dist__legend { gap: 10px; font-size: 0.72rem; }
+            .playtime-dist { padding: 16px; }
+        }
+        @media (max-width: 399px) {
+            .stats-dashboard { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .stat-card__value { font-size: 1.2rem; }
+            .stat-card { padding: 10px; }
+        }
+        @media (pointer: coarse) {
+            .add-card-btn { cursor: pointer; }
+            .modal .btn, .card-actions button { cursor: pointer; }
+            .star-input { cursor: pointer; }
+        }
+
+        /* ================================================================
+           折叠面板 — 书架/片单/番单共用
+           ================================================================ */
+        .collapsible-body {
+            max-height: 420px;
+            overflow: hidden;
+            transition: max-height 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .collapsible-body::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+            height: 48px;
+            background: linear-gradient(transparent, var(--bg));
+            pointer-events: none;
+            transition: opacity 0.35s;
+        }
+        .collapsible-body--expanded { max-height: 5000px; }
+        .collapsible-body--expanded::after { opacity: 0; }
+        /* section-alt 用暖色底做渐变 */
+        .section-alt .collapsible-body::after {
+            background: linear-gradient(transparent, var(--bg-warm));
+        }
+
+        .collapse-toggle {
+            display: none; margin-top: 14px;
+            padding: 10px 22px;
+            background: transparent; border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text-dim);
+            font-size: 0.82rem; font-family: inherit; cursor: pointer;
+            transition: all 0.25s;
+            align-items: center; gap: 6px;
+        }
+        .collapse-toggle:hover {
+            border-color: var(--accent); color: var(--accent);
+            background: rgba(147,130,255,0.06);
+        }
+        .collapse-toggle--visible { display: inline-flex; }
+        .collapse-toggle__icon {
+            display: inline-block; transition: transform 0.35s;
+            font-size: 0.72rem; line-height: 1;
+        }
+        .collapse-toggle--expanded .collapse-toggle__icon {
+            transform: rotate(180deg);
+        }
+
+        /* 响应式 */
+        @media (max-width: 767px) {
+            .collapsible-body { max-height: 340px; }
+            .collapse-toggle { padding: 8px 18px; font-size: 0.78rem; margin-top: 10px; }
+        }
+
+        /* 触摸设备 */
+        @media (pointer: coarse) {
+            .collapse-toggle { cursor: pointer; }
+        }
+
+        /* ================================================================
+           加载动画 — 三幕叙事: 巨环→名字移动→水波展开
+           ================================================================ */
+        .loader {
+            position: fixed; inset: 0; z-index: 100000;
+            background: #05040a;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.8s 0.1s cubic-bezier(0.4, 0, 0.2, 1),
+                        visibility 0.8s 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .loader--done {
+            opacity: 0; visibility: hidden; pointer-events: none;
+        }
+
+        /* ===== 巨环 — 占据 70% 视口 ===== */
+        .loader__ring-stage {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70vmin; height: 70vmin;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none;
+        }
+        .loader__ring {
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            border: 0.6px solid transparent;
+            background:
+                conic-gradient(
+                    from 210deg, transparent 0deg, rgba(147,130,255,0.12) 40deg,
+                    rgba(232,168,80,0.18) 120deg, rgba(94,196,184,0.12) 200deg,
+                    transparent 210deg, transparent 360deg
+                ) border-box;
+            -webkit-mask:
+                linear-gradient(#fff 0 0) padding-box,
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            animation: ring-rotate 20s linear infinite,
+                       ring-fade-in 0.6s 0.15s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        }
+        .loader__ring--inner {
+            width: 68%; height: 68%;
+            background:
+                conic-gradient(
+                    from 90deg, transparent 0deg, rgba(94,196,184,0.10) 50deg,
+                    rgba(147,130,255,0.14) 130deg, rgba(232,168,80,0.10) 190deg,
+                    transparent 200deg, transparent 360deg
+                ) border-box;
+            opacity: 0;
+            animation: ring-rotate 16s linear infinite reverse,
+                       ring-fade-in 0.6s 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        }
+        .loader__ring--core {
+            width: 38%; height: 38%;
+            border: 0.5px solid rgba(232,168,80,0.15);
+            opacity: 0;
+            animation: ring-rotate 12s linear infinite,
+                       ring-fade-in 0.6s 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        }
+
+        /* 巨环外围辉光 */
+        .loader__ring-halo {
+            position: absolute; inset: -15%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 30%,
+                rgba(147,130,255,0.06) 0%, transparent 40%,
+                rgba(232,168,80,0.04) 60%, transparent 80%);
+            filter: blur(60px);
+            opacity: 0;
+            animation: halo-breathe 4s ease-in-out infinite alternate,
+                       ring-fade-in 0.8s 0.1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        }
+
+        @keyframes ring-rotate {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        @keyframes ring-fade-in {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        @keyframes halo-breathe {
+            0%   { opacity: 0.4; transform: scale(0.95); }
+            100% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        /* ============================================================
+           名字层 — 可移动锚点
+           ============================================================ */
+        .loader__text {
+            position: absolute;
+            /* 初始位置由 JS 设为视口中心像素值 */
+            left: 50vw; top: 50vh;
+            transform: translate(-50%, -50%);
+            z-index: 10; text-align: center;
+            pointer-events: none;
+            transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        top 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* ---- 第一幕：名字渐显 ---- */
+        .loader__name {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            color: #eae6f2;
+            opacity: 0;
+            animation: name-reveal 0.7s 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            transition: font-size 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        letter-spacing 0.6s ease-out, color 0.6s, opacity 0.4s;
+        }
+        .loader__sub {
+            margin-top: 12px;
+            font-size: clamp(0.7rem, 1.2vw, 0.85rem);
+            font-weight: 400;
+            letter-spacing: 0.35em;
+            color: var(--text-muted);
+            opacity: 0;
+            animation: name-reveal 0.7s 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            transition: opacity 0.4s, letter-spacing 0.8s, font-size 0.8s;
+        }
+        @keyframes name-reveal {
+            from { opacity: 0; letter-spacing: 0.15em; filter: blur(4px); }
+            to   { opacity: 1; letter-spacing: 0.04em; filter: blur(0); }
+        }
+
+        /* --- name-move: 名字移动 + 巨环溶解 --- */
+        .loader--name-move .loader__name {
+            font-size: clamp(2.2rem, 5vw, 3.5rem);
+            letter-spacing: 0;
+            /* 与页面 hero h1 完全一致的渐变文字 */
+            background: linear-gradient(135deg, var(--accent), #c4a0ff, var(--teal), var(--accent-warm));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .loader--name-move .loader__sub {
+            opacity: 0;
+            letter-spacing: 0.5em;
+        }
+        .loader--name-move .loader__ring {
+            animation: ring-dissolve 0.5s 0.05s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .loader--name-move .loader__ring--inner {
+            animation: ring-dissolve 0.5s 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .loader--name-move .loader__ring--core {
+            animation: ring-dissolve 0.5s 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .loader--name-move .loader__ring-halo {
+            animation: ring-dissolve 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes ring-dissolve {
+            to { opacity: 0; }
+        }
+
+        /* --- 水波展开：loader 淡出，页面露出，涟漪环扩散 --- */
+        .loader--ripple {
+            opacity: 0;
+        }
+
+        /* 涟漪光环 */
+        .loader__ripple-stage {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0;
+        }
+        .loader--ripple .loader__ripple-stage {
+            opacity: 1;
+        }
+        .loader__ripple-ring {
+            position: absolute;
+            width: 200vmax; height: 200vmax;
+            border-radius: 50%;
+            border: 1.5px solid rgba(147,130,255,0.5);
+            transform: translate(-50%, -50%) scale(0);
+            left: 0; top: 0;
+        }
+        .loader--ripple .loader__ripple-ring--1 {
+            animation: ripple-wave 1.0s 0.0s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .loader--ripple .loader__ripple-ring--2 {
+            border-color: rgba(232,168,80,0.35);
+            animation: ripple-wave 1.0s 0.16s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .loader--ripple .loader__ripple-ring--3 {
+            border-color: rgba(94,196,184,0.25);
+            animation: ripple-wave 1.0s 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @keyframes ripple-wave {
+            0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; border-width: 2.5px; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; border-width: 0.2px; }
+        }
+
+        /* ===== 移动端适配 ===== */
+        @media (max-width: 767px) {
+            .loader__ring-stage { width: 85vmin; height: 85vmin; }
+            .loader__name { letter-spacing: 0.02em; }
+            .loader--name-move .loader__name {
+                font-size: 1.8rem;
+            }
+        }
+        @media (max-width: 399px) {
+            .loader--name-move .loader__name {
+                font-size: 1.55rem;
+            }
+        }
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .loader--name-move .loader__name {
+                font-size: 2.6rem;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .loader__ring,
+            .loader__ring--inner,
+            .loader__ring--core,
+            .loader__ring-halo,
+            .loader__ripple-ring { animation: none !important; opacity: 0.5; }
+            .loader__name { animation: none !important; opacity: 1; }
+            .loader__sub { animation: none !important; opacity: 0.6; }
+            .loader--ripple { opacity: 0 !important; }
         }
     </style>
 </head>
 <body>
+    <!-- ===== 加载动画 — 三幕叙事 ===== -->
+    <div class="loader" id="loader">
+        <div class="loader__ring-stage">
+            <div class="loader__ring-halo"></div>
+            <div class="loader__ring"></div>
+            <div class="loader__ring loader__ring--inner"></div>
+            <div class="loader__ring loader__ring--core"></div>
+        </div>
+        <!-- 名字层（第一幕浮现 → 第二幕移动到 hero 位置 → 第三幕水波蒙版） -->
+        <div class="loader__text">
+            <div class="loader__name">w1nterxt</div>
+            <div class="loader__sub">DESIGN &middot; BUILD &middot; ITERATE</div>
+        </div>
+        <!-- 水波涟漪环 -->
+        <div class="loader__ripple-stage">
+            <div class="loader__ripple-ring loader__ripple-ring--1"></div>
+            <div class="loader__ripple-ring loader__ripple-ring--2"></div>
+            <div class="loader__ripple-ring loader__ripple-ring--3"></div>
+        </div>
+    </div>
+
+    <!-- 氛围光晕 -->
+    <div class="ambient-orb ambient-orb--top-right"></div>
+    <div class="ambient-orb ambient-orb--mid-left"></div>
+    <div class="ambient-orb ambient-orb--bottom-right"></div>
+    <div class="ambient-orb ambient-orb--center-glow"></div>
+    <!-- 侧边装饰线 -->
+    <div class="side-line side-line--left"></div>
+    <div class="side-line side-line--right"></div>
+
+    <!-- 滚动进度条 -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
     <!-- 星系指针 -->
     <canvas class="cursor-canvas" id="cursorCanvas"></canvas>
 
@@ -194,23 +1487,55 @@
     <div class="container">
         <!-- 导航 -->
         <nav>
-            <a href="#projects">项目</a>
+            <a href="#books">书架</a>
+            <a href="#movies">片单</a>
+            <a href="#anime">番单</a>
+            <a href="#universes">宇宙</a>
+            <a href="#games">游戏</a>
             <a href="#contact">联系</a>
         </nav>
 
         <!-- Hero -->
-        <header class="hero">
-            <img class="avatar" src="https://github.com/w1nterxt.png" alt="w1nterxt">
+        <header class="hero reveal">
+            <img class="avatar" src="avatar.svg" alt="w1nterxt">
             <h1>w1nterxt</h1>
-            <p class="tagline">CS 在读。写代码、搭东西，能用脚本解决的绝不动手。</p>
+            <p class="bio">CS 大三 · Python / Linux / AI · 在西安</p>
+
+            <!-- 状态徽章 -->
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                Open to collaborate
+            </div>
+
+            <!-- 轮播标语 -->
+            <div class="tagline-wrap" id="taglineWrap">
+                <span class="tagline-item active">CS 在读。写代码、搭东西，能用脚本解决的绝不动手。</span>
+                <span class="tagline-item">Python 为主，折腾 AI 应用和自动化工具。</span>
+                <span class="tagline-item">Linux 日常用户，终端比 GUI 顺手。</span>
+                <span class="tagline-item">实用主义 — 东西先跑起来，再谈优化。</span>
+            </div>
         </header>
 
-        <!-- 项目 -->
-        <section class="section" id="projects">
+        <!-- 技术栈 -->
+        <section class="section reveal" id="projects">
+            <h2 class="section-title">技术栈</h2>
+            <div class="tech-cloud">
+                <span class="tech-pill">🐍 Python</span>
+                <span class="tech-pill">🐧 Linux</span>
+                <span class="tech-pill">🤖 AI / LLM</span>
+                <span class="tech-pill">🖥️ Git</span>
+                <span class="tech-pill">📦 VS Code</span>
+                <span class="tech-pill">🌐 HTML / CSS</span>
+                <span class="tech-pill">⚡ 自动化脚本</span>
+                <span class="tech-pill">🔧 终端工具</span>
+            </div>
+        </section>
+
+        <!-- 做过的东西 -->
+        <section class="section section-alt reveal">
             <h2 class="section-title">做过的东西</h2>
             <div class="projects-grid">
-                <!-- 圣诞小玩具 -->
-                <a href="https://github.com/w1nterxt/Supreise-For-Ymm" class="project-card" target="_blank">
+                <a href="https://github.com/w1nterxt/Supreise-For-Ymm" class="project-card" target="_blank" rel="noopener noreferrer">
                     <h3>Merry Christmas</h3>
                     <p>一个圣诞主题的互动页面。</p>
                     <div class="tag-row">
@@ -219,23 +1544,93 @@
                         <span class="mini-tag">动画</span>
                     </div>
                 </a>
+            </div>
+        </section>
 
-                <!-- 占位卡片 — 方便后续添加 -->
-                <div class="project-card" style="border-style: dashed; opacity: 0.5;">
-                    <h3>新项目占位</h3>
-                    <p>下一个有趣的项目会出现在这里。</p>
-                    <div class="tag-row">
-                        <span class="mini-tag">Coming Soon</span>
+        <!-- 书架（书单） -->
+        <section class="section reveal" id="books">
+            <h2 class="section-title">书架</h2>
+            <div class="collapsible-body" id="booksBody">
+                <div class="books-grid" id="booksGrid"></div>
+            </div>
+            <button class="add-card-btn" data-collection="books">+ 添加书目</button>
+            <button class="collapse-toggle" data-section="books">
+                展开全部 <span class="collapse-toggle__icon">▾</span>
+            </button>
+        </section>
+
+        <!-- 片单 -->
+        <section class="section section-alt reveal" id="movies">
+            <h2 class="section-title">片单</h2>
+            <div class="collapsible-body" id="moviesBody">
+                <div class="media-grid-wide" id="moviesGrid"></div>
+            </div>
+            <button class="add-card-btn" data-collection="movies">+ 添加影片</button>
+            <button class="collapse-toggle" data-section="movies">
+                展开全部 <span class="collapse-toggle__icon">▾</span>
+            </button>
+        </section>
+
+        <!-- 番单 -->
+        <section class="section reveal" id="anime">
+            <h2 class="section-title">番单</h2>
+            <div class="collapsible-body" id="animeBody">
+                <div class="media-grid-wide" id="animeGrid"></div>
+            </div>
+            <button class="add-card-btn" data-collection="anime">+ 添加番剧</button>
+            <button class="collapse-toggle" data-section="anime">
+                展开全部 <span class="collapse-toggle__icon">▾</span>
+            </button>
+        </section>
+
+        <!-- 文化宇宙 -->
+        <section class="section section-alt reveal" id="universes">
+            <h2 class="section-title">文化宇宙</h2>
+            <div class="universe-grid">
+                <div class="universe-card">
+                    <div class="universe-card__title">
+                        <span class="universe-card__icon">🐙</span>
+                        克苏鲁神话
                     </div>
+                    <p class="universe-card__desc">洛夫克拉夫特开创的宇宙恐怖体系。核心设定：人类在浩瀚宇宙中渺小且无知，真正的恐惧来自无法理解的未知存在。旧日支配者、外神、梦境诸神共同构成了一个令人着迷的黑暗神话。</p>
+                </div>
+                <div class="universe-card">
+                    <div class="universe-card__title">
+                        <span class="universe-card__icon">🔒</span>
+                        SCP 基金会
+                    </div>
+                    <p class="universe-card__desc">全球协同创作的异常收容世界观。「控制、收容、保护」——数千篇文档构建出一个庞大而严谨的超自然宇宙。从无害小物件到灭世级实体，每一篇 SCP 文档都是一次想象力实验。</p>
                 </div>
             </div>
         </section>
 
+        <!-- 游戏 -->
+        <section class="section reveal" id="games">
+            <h2 class="section-title">游戏</h2>
+            <div class="stats-dashboard" id="steam-stats-dashboard"></div>
+            <div class="playtime-dist" id="steam-playtime-dist"></div>
+            <div class="steam-profile" id="steam-profile">
+                <img class="steam-profile__avatar" id="steam-avatar" src="" alt="">
+                <div class="steam-profile__info">
+                    <div class="steam-profile__name" id="steam-name"></div>
+                    <div class="steam-profile__stats" id="steam-stats"></div>
+                </div>
+                <a class="steam-profile__link" id="steam-url" href="#" target="_blank" rel="noopener noreferrer">Steam 资料 →</a>
+            </div>
+            <h3 class="subsection-title">游戏库</h3>
+            <div class="collapsible-body" id="steamGamesBody">
+                <div class="steam-games-grid" id="steam-games"></div>
+            </div>
+            <button class="collapse-toggle" data-section="steamGames" style="margin-top:12px;">
+                展开全部 <span class="collapse-toggle__icon">▾</span>
+            </button>
+        </section>
+
         <!-- 联系 -->
-        <section class="section" id="contact">
+        <section class="section reveal" id="contact">
             <h2 class="section-title">找到我</h2>
             <div class="contact-links">
-                <a href="https://github.com/w1nterxt" class="contact-link" target="_blank">
+                <a href="https://github.com/w1nterxt" class="contact-link" target="_blank" rel="noopener noreferrer">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.605-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12 24 5.37 18.63 0 12 0z"/></svg>
                     GitHub
                 </a>
@@ -246,13 +1641,12 @@
             </div>
         </section>
 
-        <!-- Footer -->
         <footer>
-            <p>&copy; 2026 w1nterxt — Built with &hearts; and plain HTML</p>
+            <p>&copy; <span id="currentYear"></span> w1nterxt — Built with &hearts; and plain HTML</p>
         </footer>
     </div>
 
-    <!-- 星空 + 指针脚本 -->
+    <!-- 星空脚本（含点击涟漪 + Konami 流星雨） -->
     <script>
     (function() {
         const canvas = document.getElementById('stars');
@@ -260,6 +1654,11 @@
         let stars = [];
         let mouse = { x: -999, y: -999 };
         const count = 180;
+
+        // 点击涟漪系统
+        let bursts = [];
+        // 流星雨系统
+        let meteorShower = { active: false, particles: [], timer: null };
 
         function resize() {
             canvas.width = window.innerWidth;
@@ -270,8 +1669,8 @@
             stars = [];
             for (let i = 0; i < count; i++) {
                 const r = Math.random() < 0.08
-                    ? Math.random() * 1.2 + 1.8   // 少量亮星
-                    : Math.random() * 1.1 + 0.4;  // 多数暗星
+                    ? Math.random() * 1.2 + 1.8
+                    : Math.random() * 1.1 + 0.4;
                 stars.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
@@ -281,15 +1680,82 @@
                     speedY: (Math.random() - 0.5) * 0.15,
                     pulse: Math.random() * Math.PI * 2,
                     pulseSpeed: 0.005 + Math.random() * 0.02,
-                    hue: Math.random() < 0.2 ? 260 : 210 + Math.random() * 50
+                    hue: (() => {
+                        const r = Math.random();
+                        if (r < 0.15) return 35;    // 暖金
+                        if (r < 0.30) return 170;   // 青
+                        if (r < 0.45) return 260;   // 紫
+                        if (r < 0.55) return 350;   // 玫红
+                        return 220 + Math.random() * 60; // 蓝紫
+                    })()
                 });
             }
+        }
+
+        // 点击涟漪
+        function addBurst(x, y) {
+            bursts.push({ x, y, life: 1, maxR: 180 + Math.random() * 60 });
+        }
+
+        // 触发流星雨
+        function triggerMeteorShower() {
+            if (meteorShower.active) return;
+            meteorShower.active = true;
+            // 快速生成流星粒子
+            const spawn = () => {
+                if (!meteorShower.active) return;
+                for (let i = 0; i < 8; i++) {
+                    meteorShower.particles.push({
+                        x: Math.random() * canvas.width * 1.3 - canvas.width * 0.15,
+                        y: -20 - Math.random() * 100,
+                        vx: -1.5 + Math.random() * 3,
+                        vy: 4 + Math.random() * 6,
+                        life: 1,
+                        len: 30 + Math.random() * 50,
+                        hue: [40, 170, 260, 340][Math.floor(Math.random() * 4)] + Math.random() * 20
+                    });
+                }
+                // 限制粒子数
+                if (meteorShower.particles.length > 200) {
+                    meteorShower.particles = meteorShower.particles.slice(-150);
+                }
+                meteorShower.timer = setTimeout(spawn, 80 + Math.random() * 60);
+            };
+            spawn();
+            // 5秒后停止生成，再过2秒清空
+            setTimeout(() => {
+                meteorShower.active = false;
+                clearTimeout(meteorShower.timer);
+            }, 5000);
+            setTimeout(() => { meteorShower.particles = []; }, 7000);
         }
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 连线（近的亮星之间）
+            // 绘制流星粒子
+            for (let i = meteorShower.particles.length - 1; i >= 0; i--) {
+                const m = meteorShower.particles[i];
+                m.x += m.vx; m.y += m.vy; m.life -= 0.012;
+                if (m.life <= 0 || m.y > canvas.height + 100) {
+                    meteorShower.particles.splice(i, 1);
+                    continue;
+                }
+                const ex = m.x - m.vx * m.len * 0.1;
+                const ey = m.y - m.vy * m.len * 0.1;
+                const grad = ctx.createLinearGradient(ex, ey, m.x, m.y);
+                grad.addColorStop(0, 'transparent');
+                grad.addColorStop(0.6, `hsla(${m.hue}, 80%, 80%, ${m.life * 0.6})`);
+                grad.addColorStop(1, `hsla(${m.hue}, 100%, 95%, ${m.life})`);
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = 1.2 * m.life;
+                ctx.beginPath();
+                ctx.moveTo(ex, ey);
+                ctx.lineTo(m.x, m.y);
+                ctx.stroke();
+            }
+
+            // 绘制星间连线
             for (let i = 0; i < stars.length; i++) {
                 if (stars[i].r < 1.5) continue;
                 for (let j = i + 1; j < stars.length; j++) {
@@ -302,43 +1768,60 @@
                         ctx.beginPath();
                         ctx.moveTo(stars[i].x, stars[i].y);
                         ctx.lineTo(stars[j].x, stars[j].y);
-                        ctx.strokeStyle = `rgba(140, 130, 255, ${alpha})`;
+                        ctx.strokeStyle = `rgba(160, 140, 220, ${alpha})`;
                         ctx.lineWidth = 0.5;
                         ctx.stroke();
                     }
                 }
             }
 
+            // 绘制星星
             for (const s of stars) {
                 s.pulse += s.pulseSpeed;
                 s.x += s.speedX;
                 s.y += s.speedY;
 
-                // 边界回弹
                 if (s.x < -10) s.x = canvas.width + 10;
                 if (s.x > canvas.width + 10) s.x = -10;
                 if (s.y < -10) s.y = canvas.height + 10;
                 if (s.y > canvas.height + 10) s.y = -10;
 
-                const alpha = s.baseAlpha + 0.25 * Math.sin(s.pulse);
+                // 检查是否有涟漪影响这颗星
+                let burstBoost = 0;
+                for (const b of bursts) {
+                    const bdx = s.x - b.x, bdy = s.y - b.y;
+                    const bdist = Math.sqrt(bdx * bdx + bdy * bdy);
+                    if (bdist < b.maxR * b.life) {
+                        burstBoost += (1 - bdist / (b.maxR * b.life)) * b.life * 1.2;
+                    }
+                }
+
+                const alpha = Math.min(1, s.baseAlpha + 0.25 * Math.sin(s.pulse) + burstBoost);
+                const starR = s.r + burstBoost * 2;
                 ctx.beginPath();
-                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                ctx.fillStyle = `hsla(${s.hue}, 60%, 80%, ${alpha})`;
+                ctx.arc(s.x, s.y, starR, 0, Math.PI * 2);
+                const starHue = burstBoost > 0.1 ? 40 : s.hue;
+                ctx.fillStyle = `hsla(${starHue}, ${55 + burstBoost * 40}%, ${78 + burstBoost * 15}%, ${alpha})`;
                 ctx.fill();
 
-                // 亮星加光晕
-                if (s.r > 1.3) {
-                    const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 3);
-                    glow.addColorStop(0, `hsla(${s.hue}, 80%, 75%, ${alpha * 0.4})`);
+                if (s.r > 1.3 || burstBoost > 0.05) {
+                    const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, starR * 3);
+                    glow.addColorStop(0, `hsla(${starHue}, 80%, 75%, ${alpha * (0.4 + burstBoost)})`);
                     glow.addColorStop(1, 'transparent');
                     ctx.beginPath();
-                    ctx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
+                    ctx.arc(s.x, s.y, starR * 3, 0, Math.PI * 2);
                     ctx.fillStyle = glow;
                     ctx.fill();
                 }
             }
 
-            // 鼠标吸引：靠近指针的星星微微发光
+            // 衰变涟漪
+            for (let i = bursts.length - 1; i >= 0; i--) {
+                bursts[i].life -= 0.015;
+                if (bursts[i].life <= 0) bursts.splice(i, 1);
+            }
+
+            // 鼠标附近星星提亮
             if (mouse.x > -500) {
                 for (const s of stars) {
                     const dx = s.x - mouse.x;
@@ -348,7 +1831,7 @@
                         const strength = (1 - dist / 150) * 0.5;
                         ctx.beginPath();
                         ctx.arc(s.x, s.y, s.r + 2, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(180, 160, 255, ${strength})`;
+                        ctx.fillStyle = `rgba(210, 180, 255, ${strength})`;
                         ctx.fill();
                     }
                 }
@@ -360,31 +1843,155 @@
         resize();
         createStars();
         draw();
-        window.addEventListener('resize', () => { resize(); createStars(); });
+        let resizeTimer;
+        window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { resize(); createStars(); }, 150); });
         canvas.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
         canvas.addEventListener('mouseleave', () => { mouse.x = -999; mouse.y = -999; });
+
+        // 点击涟漪
+        document.addEventListener('click', e => {
+            addBurst(e.clientX, e.clientY);
+        });
+
+        // 暴露流星雨触发给 Konami
+        window._triggerMeteorShower = triggerMeteorShower;
     })();
     </script>
 
-    <!-- 彗星拖尾 (全屏 canvas) -->
+    <!-- 轮播标语脚本 -->
+    <script>
+    (function() {
+        const items = document.querySelectorAll('.tagline-item');
+        let current = 0;
+        const total = items.length;
+        if (total <= 1) return;
+
+        setInterval(() => {
+            items[current].classList.remove('active');
+            current = (current + 1) % total;
+            items[current].classList.add('active');
+        }, 3500);
+    })();
+    </script>
+
+    <!-- Konami Code 彩蛋 -->
+    <script>
+    (function() {
+        const code = [38,38,40,40,37,39,37,39,66,65];
+        let buf = [];
+        document.addEventListener('keydown', e => {
+            buf.push(e.keyCode);
+            buf = buf.slice(-10);
+            if (buf.join(',') === code.join(',')) {
+                buf = [];
+                if (window._triggerMeteorShower) window._triggerMeteorShower();
+                // 微妙的提示文字
+                const toast = document.createElement('div');
+                toast.textContent = '✨ 彩蛋解锁';
+                Object.assign(toast.style, {
+                    position: 'fixed', bottom: '30px', left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: 'rgba(147,130,255,0.2)', color: '#d0c0ff',
+                    padding: '8px 20px', borderRadius: '20px',
+                    fontSize: '0.85rem', zIndex: '99999',
+                    border: '1px solid rgba(147,130,255,0.4)',
+                    opacity: '0', transition: 'opacity 0.3s',
+                    pointerEvents: 'none'
+                });
+                document.body.appendChild(toast);
+                requestAnimationFrame(() => { toast.style.opacity = '1'; });
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 400);
+                }, 2000);
+            }
+        });
+    })();
+    </script>
+
+    <!-- 滚动进度 + 动态年份 + 头像双击翻转 -->
+    <script>
+    (function() {
+        // 滚动进度条
+        const progressBar = document.getElementById('scrollProgress');
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            progressBar.style.width = Math.min(100, pct) + '%';
+        }, { passive: true });
+
+        // 动态年份
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // 头像双击翻转
+        const avatar = document.querySelector('.hero .avatar');
+        if (avatar) {
+            avatar.style.transition = 'transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55), box-shadow 0.3s';
+            avatar.addEventListener('dblclick', () => {
+                avatar.style.transform = 'rotateY(360deg) scale(1.08)';
+                setTimeout(() => { avatar.style.transform = ''; }, 650);
+            });
+        }
+    })();
+    </script>
+
+    <!-- 滚动入场动画 + 导航高亮 -->
+    <script>
+    (function() {
+        // 滚动入场
+        const revealEls = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+        revealEls.forEach(el => revealObserver.observe(el));
+
+        // 导航高亮
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('nav a[href^="#"]');
+
+        const navObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    navLinks.forEach(link => {
+                        link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+                    });
+                }
+            });
+        }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+
+        sections.forEach(s => navObserver.observe(s));
+    })();
+    </script>
+
+    <!-- 光线暂留拖尾 (全屏 canvas，半透明覆盖渐变消退) -->
     <canvas class="cursor-canvas" id="trailCanvas" style="z-index:9997;"></canvas>
 
     <!-- 星系指针 -->
     <script>
     (function() {
+        // 仅在精确指针设备（鼠标）启用自定义光标；触摸屏走原生
+        if (window.matchMedia('(pointer: coarse)').matches) return;
+
         const tc = document.getElementById('trailCanvas');
         const tctx = tc.getContext('2d');
         const c = document.getElementById('cursorCanvas');
         const ctx = c.getContext('2d');
         let mx = -200, my = -200;
         let smx = -200, smy = -200;
-        let pmx = -200, pmy = -200; // 上一帧位置（用于速度）
         let time = 0;
         let targetProgress = 0;
         let progress = 0;
-        const size = 120;
-        const trailParticles = [];
-        const maxTrail = 60;
+        const size = 100;
+        const trailHistory = [];
+        const trailMax = 45;
 
         c.width = size; c.height = size;
 
@@ -393,17 +2000,19 @@
             tc.height = window.innerHeight;
         }
         resizeTrail();
-        window.addEventListener('resize', resizeTrail);
+        let trailResizeTimer;
+        window.addEventListener('resize', () => { clearTimeout(trailResizeTimer); trailResizeTimer = setTimeout(resizeTrail, 150); });
 
         document.addEventListener('mousemove', e => {
-            pmx = mx; pmy = my;
             mx = e.clientX; my = e.clientY;
         });
         document.addEventListener('mouseleave', () => {
             mx = -200; my = -200;
+            trailHistory.length = 0;
         });
 
-        document.querySelectorAll('a, button, .project-card').forEach(el => {
+        // 所有可交互元素的悬停检测
+        document.querySelectorAll('a, button, .project-card, .book-card, .universe-card, .media-card, .tech-pill').forEach(el => {
             el.addEventListener('mouseenter', () => { targetProgress = 1; });
             el.addEventListener('mouseleave', () => { targetProgress = 0; });
         });
@@ -412,8 +2021,8 @@
 
         function draw(t) {
             time = t * 0.001;
-            smx += (mx - smx) * 0.15;
-            smy += (my - smy) * 0.15;
+            smx += (mx - smx) * 0.12;
+            smy += (my - smy) * 0.12;
             progress += (targetProgress - progress) * 0.07;
 
             const cx = smx, cy = smy;
@@ -421,77 +2030,82 @@
             c.style.top  = (cy - size/2) + 'px';
 
             ctx.clearRect(0, 0, size, size);
+
+            // === 光线暂留拖尾：位置历史 + 渐变光带 ===
+            // 清空画布（canvas 背景透明，不挡网页内容）
             tctx.clearRect(0, 0, tc.width, tc.height);
+
+            // 每帧记录当前位置到历史队列
+            trailHistory.push({ x: smx, y: smy });
+            while (trailHistory.length > trailMax) trailHistory.shift();
 
             if (mx < -100) { requestAnimationFrame(draw); return; }
 
-            // === 彗星拖尾粒子 ===
-            const trailAlpha = 1 - progress; // 悬停时拖尾渐隐
-            const dx = mx - pmx;
-            const dy = my - pmy;
-            const speed = Math.sqrt(dx * dx + dy * dy);
+            const trailStrength = 1 - progress * 0.6;
 
-            if (speed > 0.2 && trailAlpha > 0.02) {
-                // 沿移动方向散布粒子
-                const spawnCount = Math.min(Math.floor(speed * 0.4), 5);
-                for (let i = 0; i < spawnCount; i++) {
-                    const t = (i + 1) / (spawnCount + 1);
-                    trailParticles.push({
-                        x: mx - dx * t * 0.8,
-                        y: my - dy * t * 0.8,
-                        life: 1,
-                        decay: 0.012 + Math.random() * 0.025,
-                        size: 0.6 + Math.random() * 3.5,
-                        hue: 250 + Math.random() * 40,
-                        vx: (Math.random() - 0.5) * 0.6,
-                        vy: (Math.random() - 0.5) * 0.6
-                    });
+            // 把历史点串成渐隐光带：头部亮尾暗，透明度逐段衰减
+            const len = trailHistory.length;
+            let px = trailHistory[0].x, py = trailHistory[0].y;
+            for (let i = 1; i < len; i++) {
+                const t = i / (len - 1);           // 0=尾部, 1=头部
+                const cx = trailHistory[i].x;
+                const cy = trailHistory[i].y;
+
+                // 用线段中点画光斑，连线之间也画几个插值点让光带更平滑
+                const subSteps = 3;
+                for (let s = 0; s < subSteps; s++) {
+                    const st = s / subSteps;
+                    const qx = px + (cx - px) * st;
+                    const qy = py + (cy - py) * st;
+                    const segT = (i - 1 + st) / (len - 1);  // 在整个队列中的归一化位置
+
+                    const a = (0.01 + segT * 0.25) * trailStrength;
+                    const r = 1 + segT * 8;
+                    const hue = 250 + segT * 25;
+
+                    const glow = tctx.createRadialGradient(qx, qy, 0, qx, qy, r);
+                    glow.addColorStop(0, `hsla(${hue}, 70%, 78%, ${a})`);
+                    glow.addColorStop(0.5, `hsla(${hue}, 50%, 68%, ${a * 0.3})`);
+                    glow.addColorStop(1, 'transparent');
+                    tctx.fillStyle = glow;
+                    tctx.beginPath();
+                    tctx.arc(qx, qy, r, 0, Math.PI * 2);
+                    tctx.fill();
                 }
+                px = cx; py = cy;
             }
 
-            // 绘制拖尾
-            for (let i = trailParticles.length - 1; i >= 0; i--) {
-                const pt = trailParticles[i];
-                pt.life -= pt.decay;
-                pt.x += pt.vx;
-                pt.y += pt.vy;
-                if (pt.life <= 0) { trailParticles.splice(i, 1); continue; }
-                const a = pt.life * trailAlpha;
-                const r = pt.size * pt.life;
-                tctx.beginPath();
-                tctx.arc(pt.x, pt.y, r, 0, Math.PI * 2);
-                tctx.fillStyle = `hsla(${pt.hue}, 70%, 75%, ${a})`;
-                tctx.fill();
-            }
+            // 当前位置静态光斑（即使不动也有微光）
+            const staticGlow = tctx.createRadialGradient(smx, smy, 0, smx, smy, 14);
+            staticGlow.addColorStop(0, `rgba(180, 150, 240, ${0.15 * trailStrength})`);
+            staticGlow.addColorStop(0.5, `rgba(150, 120, 220, ${0.05 * trailStrength})`);
+            staticGlow.addColorStop(1, 'transparent');
+            tctx.fillStyle = staticGlow;
+            tctx.beginPath();
+            tctx.arc(smx, smy, 14, 0, Math.PI * 2);
+            tctx.fill();
 
-            // 限制粒子数量
-            while (trailParticles.length > maxTrail) trailParticles.shift();
-
-            // === 星系指针本体 ===
+            // === 指针本体（初始双环版，去火花） ===
             const mid = size / 2;
             const p = progress;
 
-            const scale = lerp(0.75, 1.8, p);
-            const ringR  = lerp(12, 26, p);
-            const ringR2 = lerp(7, 16, p);
-
-            // 光晕
-            const glowR = lerp(14, ringR + 14, p);
+            const glowR = lerp(14, 32, p);
             const glowAlpha = lerp(0.12, 0.3, p);
             const glow = ctx.createRadialGradient(mid, mid, 0, mid, mid, glowR);
-            glow.addColorStop(0, `rgba(130,100,255,${glowAlpha})`);
-            glow.addColorStop(0.5, `rgba(100,70,240,${glowAlpha * 0.25})`);
+            glow.addColorStop(0, `rgba(150,120,255,${glowAlpha})`);
+            glow.addColorStop(0.5, `rgba(120,90,240,${glowAlpha * 0.25})`);
             glow.addColorStop(1, 'transparent');
             ctx.fillStyle = glow;
             ctx.beginPath(); ctx.arc(mid, mid, glowR, 0, Math.PI * 2); ctx.fill();
 
-            // 星环1
+            // 外环
+            const ringR  = lerp(12, 26, p);
             const ring1Alpha = lerp(0.2, 0.7, p);
             ctx.save();
             ctx.translate(mid, mid);
             ctx.rotate(-0.6);
             ctx.scale(1, 0.35);
-            ctx.strokeStyle = `rgba(160,130,255,${ring1Alpha})`;
+            ctx.strokeStyle = `rgba(180,145,255,${ring1Alpha})`;
             ctx.lineWidth = 1.2;
             ctx.beginPath(); ctx.arc(0, 0, ringR, 0, Math.PI * 2); ctx.stroke();
             const dotCount1 = Math.round(lerp(2, 6, p));
@@ -501,17 +2115,18 @@
                 const rx = Math.cos(angle) * ringR;
                 const ry = Math.sin(angle) * ringR;
                 ctx.beginPath(); ctx.arc(rx, ry, lerp(1, 2.2, p), 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(200,170,255,${dotAlpha1})`; ctx.fill();
+                ctx.fillStyle = `rgba(220,185,255,${dotAlpha1})`; ctx.fill();
             }
             ctx.restore();
 
-            // 星环2
+            // 内环
+            const ringR2 = lerp(7, 16, p);
             const ring2Alpha = lerp(0.05, 0.5, p);
             ctx.save();
             ctx.translate(mid, mid);
             ctx.rotate(1.2);
             ctx.scale(1, 0.25);
-            ctx.strokeStyle = `rgba(140,120,230,${ring2Alpha})`;
+            ctx.strokeStyle = `rgba(160,135,240,${ring2Alpha})`;
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.arc(0, 0, ringR2, 0, Math.PI * 2); ctx.stroke();
             const dotCount2 = Math.round(lerp(1, 4, p));
@@ -521,29 +2136,15 @@
                 const rx = Math.cos(angle) * ringR2;
                 const ry = Math.sin(angle) * ringR2;
                 ctx.beginPath(); ctx.arc(rx, ry, lerp(0.8, 1.8, p), 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(180,150,240,${dotAlpha2})`; ctx.fill();
+                ctx.fillStyle = `rgba(200,165,245,${dotAlpha2})`; ctx.fill();
             }
             ctx.restore();
-
-            // 悬停专属外围粒子
-            if (p > 0.05) {
-                const sparkCount = Math.floor(lerp(0, 8, p));
-                const sparkAlpha = lerp(0, 0.6, p);
-                const sparkR = ringR + 12;
-                for (let i = 0; i < sparkCount; i++) {
-                    const angle = time * 1.5 + i * (Math.PI * 2 / sparkCount);
-                    const sx = mid + Math.cos(angle) * sparkR * (0.9 + 0.1 * Math.sin(time * 3 + i));
-                    const sy = mid + Math.sin(angle) * sparkR * (0.9 + 0.1 * Math.cos(time * 2.5 + i));
-                    ctx.beginPath(); ctx.arc(sx, sy, 1.2, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255,255,255,${sparkAlpha * (0.5 + 0.5 * Math.sin(time * 4 + i))})`; ctx.fill();
-                }
-            }
 
             // 中心星
             const starOuter = lerp(8, 14, p);
             const starGlow = ctx.createRadialGradient(mid, mid, 0, mid, mid, starOuter);
             starGlow.addColorStop(0, '#fff');
-            starGlow.addColorStop(0.25, `rgba(200,170,255,${lerp(0.6, 1, p)})`);
+            starGlow.addColorStop(0.25, `rgba(220,185,255,${lerp(0.6, 1, p)})`);
             starGlow.addColorStop(1, 'transparent');
             ctx.fillStyle = starGlow;
             ctx.beginPath(); ctx.arc(mid, mid, starOuter, 0, Math.PI * 2); ctx.fill();
@@ -554,6 +2155,712 @@
         }
 
         requestAnimationFrame(draw);
+    })();
+    </script>
+
+    <!-- 加载动画 — 三幕导演脚本：巨环→名字移动→水波展开 -->
+    <script>
+    (function() {
+        var loader = document.getElementById('loader');
+        var DONE = false;
+
+        var textLayer = loader.querySelector('.loader__text');
+        var rippleStage = loader.querySelector('.loader__ripple-stage');
+
+        /* 初始化：名字定位到视口中心 */
+        function setTextToCenter() {
+            textLayer.style.left = (window.innerWidth / 2) + 'px';
+            textLayer.style.top  = (window.innerHeight / 2) + 'px';
+        }
+        setTextToCenter();
+
+        window.addEventListener('resize', function() {
+            if (!DONE && !loader.classList.contains('loader--name-move')) {
+                setTextToCenter();
+            }
+        });
+
+        /* ── 获取 hero h1 在视口中的坐标 ── */
+        function getHeroNameCenter() {
+            var heroH1 = document.querySelector('.hero h1');
+            if (!heroH1) return null;
+            var rect = heroH1.getBoundingClientRect();
+            return {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+            };
+        }
+
+        /* ── 跳过动画，直接显示页面 ── */
+        function skipToEnd() {
+            loader.classList.add('loader--done');
+            setTimeout(function() {
+                if (loader.parentNode) loader.parentNode.removeChild(loader);
+            }, 850);
+            DONE = true;
+        }
+
+        /* ── 第二幕 + 第三幕：名字移动 → 水波展开 ── */
+        function phase2() {
+            if (DONE) return;
+
+            var pos = getHeroNameCenter();
+            if (!pos) { skipToEnd(); return; }
+
+            /* 涟漪圆心定位 */
+            rippleStage.style.left = pos.x + 'px';
+            rippleStage.style.top  = pos.y + 'px';
+
+            /* 名字平滑移动到 hero h1 位置 (0.8s spring easing) + 巨环溶解 */
+            loader.classList.add('loader--name-move');
+            textLayer.style.left = pos.x + 'px';
+            textLayer.style.top  = pos.y + 'px';
+
+            /* 850ms 移动完成 → 触发水波：loader 淡出 + 涟漪环扩散 */
+            setTimeout(function() {
+                if (DONE) return;
+                loader.classList.add('loader--ripple');
+            }, 850);
+
+            /* 淡出结束 → 移除 DOM */
+            setTimeout(function() {
+                loader.classList.add('loader--done');
+            }, 1850);
+            setTimeout(function() {
+                if (loader.parentNode) loader.parentNode.removeChild(loader);
+                DONE = true;
+            }, 2500);
+        }
+
+        /* ── 触发入口 ── */
+        function start() {
+            if (DONE) return;
+            phase2();
+        }
+
+        var startTime = Date.now();
+        window.addEventListener('load', function() {
+            var elapsed = Date.now() - startTime;
+            var remaining = Math.max(0, 1800 - elapsed);
+            setTimeout(start, remaining);
+        });
+
+        /* 兜底：7 秒后强制开始 */
+        setTimeout(function() {
+            if (!DONE) start();
+        }, 7000);
+    })();
+    </script>
+
+    <!-- Steam 游戏库渲染 + 统计面板 -->
+    <script>
+    (function() {
+        var profile = document.getElementById('steam-profile');
+        var avatar = document.getElementById('steam-avatar');
+        var nameEl = document.getElementById('steam-name');
+        var statsEl = document.getElementById('steam-stats');
+        var urlEl = document.getElementById('steam-url');
+        var grid = document.getElementById('steam-games');
+        var dash = document.getElementById('steam-stats-dashboard');
+        var dist = document.getElementById('steam-playtime-dist');
+
+        fetch('steam_data.json')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var games = data.games;
+                var totalGames = data.total_games;
+                var totalHours = data.total_hours;
+                var avgHours = totalGames > 0 ? (totalHours / totalGames).toFixed(1) : 0;
+
+                // 时长分层统计
+                var tiers = [
+                    { label: '>=50h', min: 50, color: '#9382ff', games: [] },
+                    { label: '20–50h', min: 20, max: 50, color: '#e8a850', games: [] },
+                    { label: '5–20h', min: 5, max: 20, color: '#5ec4b8', games: [] },
+                    { label: '<5h', min: 0, max: 5, color: '#706b82', games: [] }
+                ];
+                games.forEach(function(g) {
+                    for (var i = 0; i < tiers.length; i++) {
+                        var t = tiers[i];
+                        if (g.hours >= t.min && (t.max === undefined || g.hours < t.max)) {
+                            t.games.push(g); break;
+                        }
+                    }
+                });
+                // 0h games go to <5h
+                tiers[3].games = tiers[3].games.concat(games.filter(function(g) { return g.hours === 0 && tiers[3].games.indexOf(g) === -1; }));
+
+                // 最近 30 天活跃
+                var now = Math.floor(Date.now() / 1000);
+                var thirtyDays = 30 * 24 * 3600;
+                var recentCount = games.filter(function(g) {
+                    return g.last_played > 0 && (now - g.last_played) < thirtyDays;
+                }).length;
+
+                // 玩家卡片
+                avatar.src = data.player.avatar;
+                avatar.alt = data.player.name;
+                nameEl.textContent = data.player.name;
+                statsEl.innerHTML = '<span>' + totalGames + '</span> 款游戏 · <span>' + totalHours + '</span> 小时';
+                urlEl.href = data.player.url;
+
+                // 统计面板
+                var topGame = games.length > 0 ? games[0] : null;
+                dash.innerHTML =
+                    '<div class="stat-card">' +
+                        '<div class="stat-card__value">' + totalGames + '</div>' +
+                        '<div class="stat-card__label">游戏总数</div>' +
+                    '</div>' +
+                    '<div class="stat-card">' +
+                        '<div class="stat-card__value">' + totalHours + 'h</div>' +
+                        '<div class="stat-card__label">总时长</div>' +
+                    '</div>' +
+                    '<div class="stat-card">' +
+                        '<div class="stat-card__value">' + avgHours + 'h</div>' +
+                        '<div class="stat-card__label">平均时长</div>' +
+                    '</div>' +
+                    '<div class="stat-card">' +
+                        '<div class="stat-card__value">' + recentCount + '</div>' +
+                        '<div class="stat-card__label">近30天活跃</div>' +
+                    '</div>';
+
+                // 时长分布条
+                var maxCount = Math.max.apply(null, tiers.map(function(t) { return t.games.length; }));
+                var barHTML = '<div class="playtime-dist__title">时长分布</div>';
+                barHTML += '<div class="playtime-dist__bar">';
+                tiers.forEach(function(t) {
+                    var flex = Math.max(1, (t.games.length / Math.max(1, maxCount)) * 100);
+                    barHTML += '<div class="playtime-dist__bar-seg" style="flex:' + flex + ';background:' + t.color + ';" title="' + t.label + ': ' + t.games.length + ' 款"></div>';
+                });
+                barHTML += '</div>';
+                barHTML += '<div class="playtime-dist__legend">';
+                tiers.forEach(function(t) {
+                    barHTML += '<span><span class="dot" style="background:' + t.color + ';"></span>' + t.label + ' (' + t.games.length + ' 款)</span>';
+                });
+                barHTML += '</div>';
+                dist.innerHTML = barHTML;
+
+                // 游戏网格（取前 30 款有游玩时长的）
+                var top = games.filter(function(g) { return g.hours >= 0.1; }).slice(0, 30);
+                top.forEach(function(g) {
+                    var card = document.createElement('a');
+                    card.className = 'steam-game';
+                    card.href = 'https://store.steampowered.com/app/' + g.appid + '/';
+                    card.target = '_blank';
+                    card.innerHTML =
+                        '<img class="steam-game__header" src="' + g.header + '" alt="' + g.name + '" loading="lazy">' +
+                        '<div class="steam-game__body">' +
+                            '<div class="steam-game__name">' + g.name + '</div>' +
+                            '<div class="steam-game__hours">' + g.hours + 'h</div>' +
+                        '</div>';
+                    grid.appendChild(card);
+                });
+
+                // Steam 游戏库折叠
+                updateSteamCollapse(top.length);
+            })
+            .catch(function() {
+                profile.style.display = 'none';
+                dash.innerHTML = '';
+                dist.innerHTML = '';
+                grid.innerHTML = '<p style="color:var(--text-muted);font-size:0.84rem;">Steam 数据暂未加载，请在本地运行 fetch_steam.py 生成 steam_data.json</p>';
+            });
+
+        var STEAM_COLLAPSE_THRESHOLD = 8;
+        function updateSteamCollapse(count) {
+            var body = document.getElementById('steamGamesBody');
+            var btn = document.querySelector('.collapse-toggle[data-section="steamGames"]');
+            if (!body || !btn) return;
+            if (count <= STEAM_COLLAPSE_THRESHOLD) {
+                body.classList.add('collapsible-body--expanded');
+                btn.classList.remove('collapse-toggle--visible', 'collapse-toggle--expanded');
+            } else {
+                btn.classList.add('collapse-toggle--visible');
+                body.classList.remove('collapsible-body--expanded');
+                btn.classList.remove('collapse-toggle--expanded');
+                btn.innerHTML = '展开全部（' + count + ' 款） <span class="collapse-toggle__icon">▾</span>';
+            }
+        }
+        function toggleSteamCollapse() {
+            var body = document.getElementById('steamGamesBody');
+            var btn = document.querySelector('.collapse-toggle[data-section="steamGames"]');
+            if (!body || !btn) return;
+            var items = body.querySelectorAll('.steam-game');
+            var count = items.length;
+            var isExpanded = body.classList.contains('collapsible-body--expanded');
+            if (isExpanded) {
+                body.classList.remove('collapsible-body--expanded');
+                btn.classList.remove('collapse-toggle--expanded');
+                btn.innerHTML = '展开全部（' + count + ' 款） <span class="collapse-toggle__icon">▾</span>';
+            } else {
+                body.classList.add('collapsible-body--expanded');
+                btn.classList.add('collapse-toggle--expanded');
+                btn.innerHTML = '收起 <span class="collapse-toggle__icon">▴</span>';
+            }
+        }
+        window.toggleSteamCollapse = toggleSteamCollapse;
+    })();
+    </script>
+
+    <!-- 收藏管理器 — 书单 / 片单 / 番单 CRUD -->
+    <script>
+    (function() {
+        // ===== 数据模型 =====
+        var STORAGE_KEYS = { books: 'w1nterxt_books', movies: 'w1nterxt_movies', anime: 'w1nterxt_anime' };
+
+        var DEFAULTS = {
+            books: [
+                { id: 'b1', title: '惊悚乐园', author: '三天两觉', tags: ['无限流','恐怖','智斗'], note: '游戏化无限流标杆。封不觉用推理+吐槽通关恐怖副本，疯批人设搭配冷笑话反差极大，设定狂狂喜。', rating: 5, status: '已读' },
+                { id: 'b2', title: '天启预报', author: '风月', tags: ['都市异能','克苏鲁','神话'], note: '克系底色的都市异能。槐诗从普通人被卷入诸神博弈，神话体系考究，文笔华丽但不过分。', rating: 5, status: '已读' },
+                { id: 'b3', title: '诡秘之主', author: '爱潜水的乌贼', tags: ['克苏鲁','蒸汽朋克','序列'], note: '22条途径、220个序列的设定工程至今无人超越。慢热但一旦入坑就停不下来，克系+维多利亚时代融合得浑然天成。', rating: 5, status: '已读' }
+            ],
+            movies: [],
+            anime: [
+                { id: 'a1', title: '夏日重现', year: '2022', tags: ['轮回','悬疑','影子病'], note: '轮回悬疑佳作，影子病设定新颖，已完结值得一看。', rating: 5, status: '已看' }
+            ]
+        };
+
+        var STATUS_OPTIONS = {
+            books: ['想读', '在读', '已读'],
+            movies: ['想看', '在看', '已看'],
+            anime: ['想看', '在追', '已看', '搁置']
+        };
+
+        var LABELS = {
+            books: { title: '书名', creator: '作者', addBtn: '添加书目', modalTitle: '编辑书目' },
+            movies: { title: '片名', creator: '导演 / 年份', addBtn: '添加影片', modalTitle: '编辑影片' },
+            anime: { title: '番名', creator: '年份', addBtn: '添加番剧', modalTitle: '编辑番剧' }
+        };
+
+        // ===== 状态管理 =====
+        var state = { collections: {}, modalOpen: false, editingId: null, editingCollection: null };
+
+        function loadCollection(name) {
+            try {
+                var raw = localStorage.getItem(STORAGE_KEYS[name]);
+                if (raw) { state.collections[name] = JSON.parse(raw); return; }
+            } catch(e) {}
+            state.collections[name] = JSON.parse(JSON.stringify(DEFAULTS[name]));
+            saveCollection(name);
+        }
+
+        function saveCollection(name) {
+            localStorage.setItem(STORAGE_KEYS[name], JSON.stringify(state.collections[name]));
+        }
+
+        function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+        // ===== 渲染 =====
+        function statusClass(status) {
+            if (status === '已读' || status === '已看') return 'card-status--done';
+            if (status === '在读' || status === '在追' || status === '在看') return 'card-status--reading';
+            return 'card-status--wish';
+        }
+
+        function starsHTML(rating) {
+            var h = '';
+            for (var i = 1; i <= 5; i++) {
+                h += '<span class="' + (i <= rating ? 'star-on' : 'star-off') + '">' + (i <= rating ? '\u2605' : '\u2606') + '</span>';
+            }
+            return '<div class="star-display">' + h + '</div>';
+        }
+
+        function tagsHTML(tags) {
+            if (!tags || !tags.length) return '';
+            return '<div class="media-card-editable__tags">' + tags.map(function(t) {
+                return '<span class="media-card-editable__tag">' + t + '</span>';
+            }).join('') + '</div>';
+        }
+
+        function actionButtons(id, collection) {
+            return '<div class="card-actions">' +
+                '<button class="btn-edit" data-id="' + id + '" data-collection="' + collection + '" title="编辑">\u270E</button>' +
+                '<button class="btn-delete" data-id="' + id + '" data-collection="' + collection + '" title="删除">\u00D7</button>' +
+            '</div>';
+        }
+
+        function renderBooks() {
+            var grid = document.getElementById('booksGrid');
+            var items = state.collections.books;
+            grid.innerHTML = items.map(function(b) {
+                return '<div class="book-card">' +
+                    actionButtons(b.id, 'books') +
+                    '<span class="card-status ' + statusClass(b.status) + '">' + b.status + '</span>' +
+                    '<div class="book-card__head">' +
+                        '<div class="book-card__title">' + b.title + '</div>' +
+                        starsHTML(b.rating) +
+                    '</div>' +
+                    '<div class="book-card__author">' + b.author + '</div>' +
+                    tagsHTML(b.tags) +
+                    (b.note ? '<p class="book-card__note">' + b.note + '</p>' : '') +
+                '</div>';
+            }).join('');
+            bindCardActions();
+            updateCollapseToggle('books');
+        }
+
+        function renderMedia(collection, gridId) {
+            var grid = document.getElementById(gridId);
+            var items = state.collections[collection];
+            var isMovie = collection === 'movies';
+            grid.innerHTML = items.map(function(m) {
+                var metaText = isMovie ? (m.director || '') : (m.year || '');
+                return '<div class="media-card-editable">' +
+                    actionButtons(m.id, collection) +
+                    '<span class="card-status ' + statusClass(m.status) + '">' + m.status + '</span>' +
+                    '<div class="media-card-editable__head">' +
+                        '<div class="media-card-editable__title">' + m.title + '</div>' +
+                        starsHTML(m.rating) +
+                    '</div>' +
+                    (metaText ? '<div class="media-card-editable__meta">' + metaText + '</div>' : '') +
+                    tagsHTML(m.tags) +
+                    (m.note ? '<div class="media-card-editable__note">' + m.note + '</div>' : '') +
+                '</div>';
+            }).join('');
+            bindCardActions();
+            updateCollapseToggle(collection);
+        }
+
+        // ===== 折叠面板 =====
+        var COLLAPSE_THRESHOLD = 5;
+        var collapseState = {}; // books/movies/anime → true=expanded
+
+        function updateCollapseToggle(collection) {
+            var body = document.getElementById(collection + 'Body');
+            var btn = document.querySelector('.collapse-toggle[data-section="' + collection + '"]');
+            if (!body || !btn) return;
+            var count = state.collections[collection] ? state.collections[collection].length : 0;
+
+            if (count <= COLLAPSE_THRESHOLD) {
+                // 少于阈值：全展开、隐藏按钮
+                body.classList.add('collapsible-body--expanded');
+                btn.classList.remove('collapse-toggle--visible', 'collapse-toggle--expanded');
+                collapseState[collection] = true;
+            } else {
+                // 多于阈值：根据保存的状态决定
+                btn.classList.add('collapse-toggle--visible');
+                var isExpanded = collapseState[collection] !== false;
+                if (isExpanded) {
+                    body.classList.add('collapsible-body--expanded');
+                    btn.classList.add('collapse-toggle--expanded');
+                    btn.innerHTML = '收起 <span class="collapse-toggle__icon">▴</span>';
+                } else {
+                    body.classList.remove('collapsible-body--expanded');
+                    btn.classList.remove('collapse-toggle--expanded');
+                    btn.innerHTML = '展开全部（' + count + ' 项） <span class="collapse-toggle__icon">▾</span>';
+                }
+            }
+        }
+
+        function toggleCollapse(collection) {
+            var body = document.getElementById(collection + 'Body');
+            var btn = document.querySelector('.collapse-toggle[data-section="' + collection + '"]');
+            if (!body || !btn) return;
+            var count = state.collections[collection] ? state.collections[collection].length : 0;
+            var isExpanded = body.classList.contains('collapsible-body--expanded');
+
+            if (isExpanded) {
+                body.classList.remove('collapsible-body--expanded');
+                btn.classList.remove('collapse-toggle--expanded');
+                btn.innerHTML = '展开全部（' + count + ' 项） <span class="collapse-toggle__icon">▾</span>';
+                collapseState[collection] = false;
+            } else {
+                body.classList.add('collapsible-body--expanded');
+                btn.classList.add('collapse-toggle--expanded');
+                btn.innerHTML = '收起 <span class="collapse-toggle__icon">▴</span>';
+                collapseState[collection] = true;
+            }
+        }
+
+        function renderAll() {
+            if (state.collections.books) renderBooks();
+            if (state.collections.movies) renderMedia('movies', 'moviesGrid');
+            if (state.collections.anime) renderMedia('anime', 'animeGrid');
+        }
+
+        // ===== 弹窗 =====
+        function getModalHTML() {
+            return '<div class="modal-overlay" id="editModal">' +
+                '<div class="modal">' +
+                    '<h3 id="modalTitle">编辑</h3>' +
+                    '<div class="form-group">' +
+                        '<label id="lblTitle">标题</label>' +
+                        '<input type="text" id="fTitle" placeholder="">' +
+                    '</div>' +
+                    '<div class="form-group">' +
+                        '<label id="lblCreator">作者</label>' +
+                        '<input type="text" id="fCreator" placeholder="">' +
+                    '</div>' +
+                    '<div class="form-group">' +
+                        '<label>标签</label>' +
+                        '<div class="tag-input-wrap" id="tagWrap">' +
+                            '<input type="text" id="fTagInput" placeholder="输入后回车添加">' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="form-group">' +
+                        '<label>评分</label>' +
+                        '<div class="star-input" id="starInput">' +
+                            '<span class="star" data-v="1">\u2605</span>' +
+                            '<span class="star" data-v="2">\u2605</span>' +
+                            '<span class="star" data-v="3">\u2605</span>' +
+                            '<span class="star" data-v="4">\u2605</span>' +
+                            '<span class="star" data-v="5">\u2605</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="form-group">' +
+                        '<label>状态</label>' +
+                        '<select id="fStatus"></select>' +
+                    '</div>' +
+                    '<div class="form-group">' +
+                        '<label>备注</label>' +
+                        '<textarea id="fNote" placeholder="简短评价或备注..."></textarea>' +
+                    '</div>' +
+                    '<div class="form-actions">' +
+                        '<button class="btn btn-delete-item" id="btnDeleteItem" style="display:none;">删除此项</button>' +
+                        '<button class="btn btn-cancel" id="btnCancel">取消</button>' +
+                        '<button class="btn btn-save" id="btnSave">保存</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        var modalState = { collection: null, editId: null, rating: 0, tags: [] };
+
+        function openModal(collection, editId) {
+            // 确保弹窗已创建
+            if (!document.getElementById('editModal')) {
+                var div = document.createElement('div');
+                div.innerHTML = getModalHTML();
+                document.body.appendChild(div.firstElementChild);
+            }
+
+            var overlay = document.getElementById('editModal');
+            var labels = LABELS[collection];
+            modalState.collection = collection;
+            modalState.editId = editId;
+            modalState.rating = 0;
+            modalState.tags = [];
+
+            document.getElementById('modalTitle').textContent = labels.modalTitle;
+            document.getElementById('lblTitle').textContent = labels.title;
+            document.getElementById('lblCreator').textContent = labels.creator;
+
+            // 状态下拉
+            var sel = document.getElementById('fStatus');
+            sel.innerHTML = STATUS_OPTIONS[collection].map(function(s) {
+                return '<option value="' + s + '">' + s + '</option>';
+            }).join('');
+
+            // 重置表单
+            document.getElementById('fTitle').value = '';
+            document.getElementById('fCreator').value = '';
+            document.getElementById('fNote').value = '';
+            document.getElementById('fTagInput').value = '';
+            updateTagChips();
+            setStarInput(0);
+            document.getElementById('btnDeleteItem').style.display = 'none';
+
+            // 编辑模式
+            if (editId) {
+                var items = state.collections[collection];
+                var item = null;
+                for (var i = 0; i < items.length; i++) {
+                    if (items[i].id === editId) { item = items[i]; break; }
+                }
+                if (item) {
+                    document.getElementById('fTitle').value = item.title || '';
+                    document.getElementById('fCreator').value = collection === 'movies' ? (item.director || '') :
+                        (collection === 'books' ? (item.author || '') : (item.year || ''));
+                    document.getElementById('fNote').value = item.note || '';
+                    modalState.tags = (item.tags || []).slice();
+                    updateTagChips();
+                    setStarInput(item.rating || 0);
+                    sel.value = item.status || STATUS_OPTIONS[collection][0];
+                    document.getElementById('btnDeleteItem').style.display = 'inline-flex';
+                }
+            } else {
+                sel.value = STATUS_OPTIONS[collection][0];
+            }
+
+            overlay.classList.add('active');
+        }
+
+        function closeModal() {
+            var overlay = document.getElementById('editModal');
+            if (overlay) overlay.classList.remove('active');
+            modalState.collection = null;
+            modalState.editId = null;
+        }
+
+        function saveModal() {
+            var collection = modalState.collection;
+            if (!collection) return;
+            var items = state.collections[collection];
+
+            var title = document.getElementById('fTitle').value.trim();
+            if (!title) return;
+
+            var creatorVal = document.getElementById('fCreator').value.trim();
+            var note = document.getElementById('fNote').value.trim();
+            var status = document.getElementById('fStatus').value;
+            var rating = modalState.rating;
+
+            var data = {
+                id: modalState.editId || genId(),
+                title: title,
+                tags: modalState.tags.slice(),
+                note: note,
+                rating: rating,
+                status: status
+            };
+
+            if (collection === 'books') { data.author = creatorVal; }
+            else if (collection === 'movies') { data.director = creatorVal; }
+            else { data.year = creatorVal; }
+
+            if (modalState.editId) {
+                for (var i = 0; i < items.length; i++) {
+                    if (items[i].id === modalState.editId) {
+                        items[i] = data; break;
+                    }
+                }
+            } else {
+                items.push(data);
+            }
+
+            saveCollection(collection);
+            closeModal();
+            if (collection === 'books') renderBooks();
+            else renderMedia(collection, collection === 'movies' ? 'moviesGrid' : 'animeGrid');
+        }
+
+        function deleteItem() {
+            var collection = modalState.collection;
+            var editId = modalState.editId;
+            if (!collection || !editId) return;
+            var items = state.collections[collection];
+            state.collections[collection] = items.filter(function(item) { return item.id !== editId; });
+            saveCollection(collection);
+            closeModal();
+            if (collection === 'books') renderBooks();
+            else renderMedia(collection, collection === 'movies' ? 'moviesGrid' : 'animeGrid');
+        }
+
+        // ===== 标签输入 =====
+        function updateTagChips() {
+            var wrap = document.getElementById('tagWrap');
+            if (!wrap) return;
+            var input = document.getElementById('fTagInput');
+            // 移除现有 chips
+            var chips = wrap.querySelectorAll('.tag-chip');
+            chips.forEach(function(c) { c.remove(); });
+            // 重建
+            modalState.tags.forEach(function(tag) {
+                var chip = document.createElement('span');
+                chip.className = 'tag-chip';
+                chip.innerHTML = tag + '<span class="tag-remove" data-tag="' + tag + '">\u00D7</span>';
+                wrap.insertBefore(chip, input);
+            });
+        }
+
+        function setStarInput(val) {
+            modalState.rating = val;
+            var stars = document.querySelectorAll('#starInput .star');
+            stars.forEach(function(s, i) {
+                s.classList.toggle('active', i < val);
+            });
+        }
+
+        // ===== 事件绑定 =====
+        function bindCardActions() {
+            document.querySelectorAll('.card-actions .btn-edit').forEach(function(btn) {
+                btn.onclick = function(e) {
+                    e.preventDefault(); e.stopPropagation();
+                    openModal(btn.dataset.collection, btn.dataset.id);
+                };
+            });
+            document.querySelectorAll('.card-actions .btn-delete').forEach(function(btn) {
+                btn.onclick = function(e) {
+                    e.preventDefault(); e.stopPropagation();
+                    var collection = btn.dataset.collection;
+                    var id = btn.dataset.id;
+                    var items = state.collections[collection];
+                    state.collections[collection] = items.filter(function(item) { return item.id !== id; });
+                    saveCollection(collection);
+                    if (collection === 'books') renderBooks();
+                    else renderMedia(collection, collection === 'movies' ? 'moviesGrid' : 'animeGrid');
+                };
+            });
+        }
+
+        function bindModalEvents() {
+            document.addEventListener('click', function(e) {
+                // 关闭弹窗
+                if (e.target.id === 'editModal') closeModal();
+                // 取消按钮
+                if (e.target.id === 'btnCancel') closeModal();
+                // 保存
+                if (e.target.id === 'btnSave') saveModal();
+                // 删除
+                if (e.target.id === 'btnDeleteItem') deleteItem();
+                // 添加按钮
+                if (e.target.classList.contains('add-card-btn') || e.target.closest('.add-card-btn')) {
+                    var btn = e.target.classList.contains('add-card-btn') ? e.target : e.target.closest('.add-card-btn');
+                    openModal(btn.dataset.collection, null);
+                }
+            });
+
+            // 星级评分交互
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('#starInput .star')) {
+                    setStarInput(parseInt(e.target.dataset.v));
+                }
+            });
+
+            // 标签输入
+            document.addEventListener('keydown', function(e) {
+                if (e.target.id === 'fTagInput' && e.key === 'Enter') {
+                    e.preventDefault();
+                    var val = e.target.value.trim();
+                    if (val && modalState.tags.indexOf(val) === -1 && modalState.tags.length < 8) {
+                        modalState.tags.push(val);
+                        updateTagChips();
+                    }
+                    e.target.value = '';
+                }
+            });
+
+            // 标签删除
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('tag-remove')) {
+                    var tag = e.target.dataset.tag;
+                    var idx = modalState.tags.indexOf(tag);
+                    if (idx !== -1) { modalState.tags.splice(idx, 1); updateTagChips(); }
+                }
+            });
+
+            // 折叠面板切换
+            document.addEventListener('click', function(e) {
+                var btn = e.target.closest('.collapse-toggle');
+                if (btn) {
+                    if (btn.dataset.section === 'steamGames') {
+                        toggleSteamCollapse();
+                    } else {
+                        toggleCollapse(btn.dataset.section);
+                    }
+                }
+            });
+
+            // ESC 关闭
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeModal();
+            });
+        }
+
+        // ===== 初始化 =====
+        ['books', 'movies', 'anime'].forEach(loadCollection);
+        renderAll();
+        bindModalEvents();
     })();
     </script>
 </body>
