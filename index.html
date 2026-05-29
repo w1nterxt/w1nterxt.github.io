@@ -31,37 +31,11 @@
             cursor: none;
         }
 
-        /* 自定义指针 */
-        .cursor-dot {
+        /* 星系指针 */
+        .cursor-canvas {
             position: fixed; z-index: 9999;
-            width: 8px; height: 8px;
-            background: var(--accent);
-            border-radius: 50%;
             pointer-events: none;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 12px var(--accent-glow);
-            transition: width 0.15s, height 0.15s;
-        }
-        .cursor-ring {
-            position: fixed; z-index: 9998;
-            width: 32px; height: 32px;
-            border: 1.5px solid rgba(108, 99, 255, 0.4);
-            border-radius: 50%;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            transition: all 0.08s ease-out;
-        }
-
-        /* 悬停可交互元素时放大 */
-        a:hover ~ .cursor-ring,
-        button:hover ~ .cursor-ring {
-            width: 48px; height: 48px;
-            border-color: var(--accent);
-        }
-        a:hover ~ .cursor-dot,
-        button:hover ~ .cursor-dot {
-            width: 14px; height: 14px;
-            background: #fff;
+            top: 0; left: 0;
         }
 
         /* ===== 星空背景 ===== */
@@ -210,9 +184,8 @@
     </style>
 </head>
 <body>
-    <!-- 自定义指针 -->
-    <div class="cursor-dot" id="cursorDot"></div>
-    <div class="cursor-ring" id="cursorRing"></div>
+    <!-- 星系指针 -->
+    <canvas class="cursor-canvas" id="cursorCanvas"></canvas>
 
     <!-- 星空 -->
     <canvas class="stars" id="stars"></canvas>
@@ -392,28 +365,110 @@
     })();
     </script>
 
-    <!-- 指针跟随 -->
+    <!-- 星系指针 -->
     <script>
     (function() {
-        const dot = document.getElementById('cursorDot');
-        const ring = document.getElementById('cursorRing');
-        let mx = -100, my = -100;
-        let rx = -100, ry = -100;
+        const c = document.getElementById('cursorCanvas');
+        const ctx = c.getContext('2d');
+        let mx = -200, my = -200;
+        let smx = -200, smy = -200;
+        let time = 0;
+        let hovering = false;
+        const size = 100; // 画布大小
+
+        c.width = size; c.height = size;
 
         document.addEventListener('mousemove', e => {
             mx = e.clientX; my = e.clientY;
-            dot.style.left = mx + 'px';
-            dot.style.top = my + 'px';
+        });
+        document.addEventListener('mouseleave', () => {
+            mx = -200; my = -200;
         });
 
-        function animateRing() {
-            rx += (mx - rx) * 0.2;
-            ry += (my - ry) * 0.2;
-            ring.style.left = rx + 'px';
-            ring.style.top = ry + 'px';
-            requestAnimationFrame(animateRing);
+        // 悬停检测
+        document.querySelectorAll('a, button, .project-card').forEach(el => {
+            el.addEventListener('mouseenter', () => { hovering = true; });
+            el.addEventListener('mouseleave', () => { hovering = false; });
+        });
+
+        function draw(t) {
+            time = t * 0.001;
+            smx += (mx - smx) * 0.15;
+            smy += (my - smy) * 0.15;
+
+            const cx = smx, cy = smy;
+            c.style.left = (cx - size/2) + 'px';
+            c.style.top  = (cy - size/2) + 'px';
+
+            ctx.clearRect(0, 0, size, size);
+            if (mx < -100) { requestAnimationFrame(draw); return; }
+
+            const mid = size / 2;
+            const scale = hovering ? 1.6 : 1;
+            const ringR = 22 * scale;
+            const ringR2 = 14 * scale;
+
+            // === 光晕 ===
+            const glow = ctx.createRadialGradient(mid, mid, 0, mid, mid, ringR + 10);
+            glow.addColorStop(0, 'rgba(130,100,255,0.25)');
+            glow.addColorStop(0.4, 'rgba(100,70,240,0.08)');
+            glow.addColorStop(1, 'transparent');
+            ctx.fillStyle = glow;
+            ctx.beginPath(); ctx.arc(mid, mid, ringR + 10, 0, Math.PI * 2); ctx.fill();
+
+            // === 星环1 (主环，倾斜45度) ===
+            ctx.save();
+            ctx.translate(mid, mid);
+            ctx.rotate(-0.6);
+            ctx.scale(1, 0.35);
+            ctx.strokeStyle = 'rgba(160,130,255,0.6)';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.arc(0, 0, ringR, 0, Math.PI * 2); ctx.stroke();
+
+            // 环上小光点
+            for (let i = 0; i < 6; i++) {
+                const angle = time * 0.8 + (i / 6) * Math.PI * 2;
+                const rx = Math.cos(angle) * ringR;
+                const ry = Math.sin(angle) * ringR;
+                ctx.beginPath(); ctx.arc(rx, ry, 2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(200,170,255,0.9)'; ctx.fill();
+            }
+            ctx.restore();
+
+            // === 星环2 (内环，反方向倾斜) ===
+            ctx.save();
+            ctx.translate(mid, mid);
+            ctx.rotate(1.2);
+            ctx.scale(1, 0.25);
+            ctx.strokeStyle = 'rgba(140,120,230,0.4)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(0, 0, ringR2, 0, Math.PI * 2); ctx.stroke();
+
+            for (let i = 0; i < 4; i++) {
+                const angle = -time * 1.1 + (i / 4) * Math.PI * 2 + 0.5;
+                const rx = Math.cos(angle) * ringR2;
+                const ry = Math.sin(angle) * ringR2;
+                ctx.beginPath(); ctx.arc(rx, ry, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(180,150,240,0.7)'; ctx.fill();
+            }
+            ctx.restore();
+
+            // === 中心星 ===
+            const starGlow = ctx.createRadialGradient(mid, mid, 0, mid, mid, 6 * scale);
+            starGlow.addColorStop(0, '#fff');
+            starGlow.addColorStop(0.3, 'rgba(200,170,255,1)');
+            starGlow.addColorStop(1, 'transparent');
+            ctx.fillStyle = starGlow;
+            ctx.beginPath(); ctx.arc(mid, mid, 6 * scale, 0, Math.PI * 2); ctx.fill();
+
+            // 中心实心点
+            ctx.beginPath(); ctx.arc(mid, mid, 2.5 * scale, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff'; ctx.fill();
+
+            requestAnimationFrame(draw);
         }
-        animateRing();
+
+        requestAnimationFrame(draw);
     })();
     </script>
 </body>
